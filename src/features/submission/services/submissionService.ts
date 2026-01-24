@@ -77,9 +77,9 @@ export const submissionService = {
 
   // 获取我的提交历史
   getMy: async (homeworkId: string) => {
-    const { data } = await api.get<{ data: SubmissionListResponseWithDetails }>(
-      `/homeworks/${homeworkId}/submissions/my`,
-    );
+    const { data } = await api.get<{
+      data: { items: SubmissionWithDetails[] };
+    }>(`/homeworks/${homeworkId}/submissions/my`);
     return data.data;
   },
 

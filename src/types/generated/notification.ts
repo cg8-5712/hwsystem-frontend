@@ -23,7 +23,7 @@ unread_only: boolean | null, page: bigint, size: bigint, };
 /**
  * 通知列表响应
  */
-export type NotificationListResponse = { notifications: Array<Notification>, pagination: PaginationInfo, };
+export type NotificationListResponse = { items: Array<Notification>, pagination: PaginationInfo, };
 
 /**
  * 通知类型

@@ -29,18 +29,9 @@ export const notificationService = {
     type?: string;
   }) => {
     const { data } = await api.get<{
-      data: {
-        notifications: NotificationWithDetails[];
-        pagination: NotificationListResponse["pagination"];
-      };
-    }>("/notifications", {
-      params,
-    });
-    // 映射 API 返回的 notifications 到前端期望的 items
-    return {
-      items: data.data.notifications,
-      pagination: data.data.pagination,
-    };
+      data: NotificationListResponseWithDetails;
+    }>("/notifications", { params });
+    return data.data;
   },
 
   // 获取未读数量

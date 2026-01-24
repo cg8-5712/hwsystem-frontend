@@ -46,3 +46,8 @@ export type SubmissionStatus = "pending" | "graded" | "late";
  * 更新提交请求
  */
 export type UpdateSubmissionRequest = { content: string | null, attachments: Array<string> | null, };
+
+/**
+ * 用户提交历史响应（无分页）
+ */
+export type UserSubmissionHistoryResponse = { items: Array<Submission>, };
