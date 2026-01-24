@@ -27,41 +27,53 @@ import { notify } from "@/stores/useNotificationStore";
 import { useCurrentUser } from "@/stores/useUserStore";
 import { useUpdateProfile } from "../hooks/useSettings";
 
-const formSchema = z
-  .object({
-    display_name: z.string().max(50, "显示名称不能超过50个字符").optional(),
-    email: z
-      .string()
-      .email("请输入有效的邮箱地址")
-      .optional()
-      .or(z.literal("")),
-    password: z
-      .string()
-      .min(6, "密码至少需要6个字符")
-      .optional()
-      .or(z.literal("")),
-    confirm_password: z.string().optional().or(z.literal("")),
-    avatar_url: z.string().url("请输入有效的URL").optional().or(z.literal("")),
-  })
-  .refine(
-    (data) => {
-      if (data.password && data.password !== data.confirm_password) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "两次输入的密码不一致",
-      path: ["confirm_password"],
-    },
-  );
+// 使用函数创建 schema 以支持 i18n
+function createFormSchema(t: (key: string) => string) {
+  return z
+    .object({
+      display_name: z
+        .string()
+        .max(50, t("settings.validation.displayNameMaxLength"))
+        .optional(),
+      email: z
+        .string()
+        .email(t("settings.validation.invalidEmail"))
+        .optional()
+        .or(z.literal("")),
+      password: z
+        .string()
+        .min(6, t("settings.validation.passwordMinLength"))
+        .optional()
+        .or(z.literal("")),
+      confirm_password: z.string().optional().or(z.literal("")),
+      avatar_url: z
+        .string()
+        .url(t("settings.validation.invalidUrl"))
+        .optional()
+        .or(z.literal("")),
+    })
+    .refine(
+      (data) => {
+        if (data.password && data.password !== data.confirm_password) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message: t("settings.validation.passwordMismatch"),
+        path: ["confirm_password"],
+      },
+    );
+}
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<ReturnType<typeof createFormSchema>>;
 
 export function SettingsPage() {
   const { t } = useTranslation();
   const user = useCurrentUser();
   const updateProfile = useUpdateProfile();
+
+  const formSchema = createFormSchema(t);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -141,8 +153,8 @@ export function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">账户设置</h1>
-        <p className="text-muted-foreground mt-1">管理你的个人资料和账户信息</p>
+        <h1 className="text-2xl font-bold">{t("settings.title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("settings.subtitle")}</p>
       </div>
 
       <div className="space-y-6">
@@ -169,9 +181,11 @@ export function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FiUser className="h-5 w-5" />
-              个人资料
+              {t("settings.profile.title")}
             </CardTitle>
-            <CardDescription>更新你的显示名称、邮箱和密码</CardDescription>
+            <CardDescription>
+              {t("settings.profile.description")}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -181,14 +195,20 @@ export function SettingsPage() {
               >
                 {/* 用户名（只读） */}
                 <div>
-                  <label className="text-sm font-medium">用户名</label>
+                  <label
+                    htmlFor="username-readonly"
+                    className="text-sm font-medium"
+                  >
+                    {t("settings.fields.username")}
+                  </label>
                   <Input
+                    id="username-readonly"
                     value={user?.username || ""}
                     disabled
                     className="mt-2 bg-muted"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    用户名创建后无法更改
+                    {t("settings.fields.usernameReadonly")}
                   </p>
                 </div>
 
@@ -198,12 +218,17 @@ export function SettingsPage() {
                   name="display_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>显示名称</FormLabel>
+                      <FormLabel>{t("settings.fields.displayName")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="输入显示名称" {...field} />
+                        <Input
+                          placeholder={t(
+                            "settings.fields.displayNamePlaceholder",
+                          )}
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>
-                        这是在系统中显示的名称，可以是你的真实姓名或昵称
+                        {t("settings.fields.displayNameDescription")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -216,11 +241,11 @@ export function SettingsPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>邮箱</FormLabel>
+                      <FormLabel>{t("settings.fields.email")}</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="输入邮箱地址"
+                          placeholder={t("settings.fields.emailPlaceholder")}
                           {...field}
                         />
                       </FormControl>
@@ -235,16 +260,16 @@ export function SettingsPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>新密码</FormLabel>
+                      <FormLabel>{t("settings.fields.password")}</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="留空则不更改密码"
+                          placeholder={t("settings.fields.passwordPlaceholder")}
                           {...field}
                         />
                       </FormControl>
                       <FormDescription>
-                        至少6个字符，留空表示不更改密码
+                        {t("settings.fields.passwordDescription")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -257,11 +282,15 @@ export function SettingsPage() {
                   name="confirm_password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>确认新密码</FormLabel>
+                      <FormLabel>
+                        {t("settings.fields.confirmPassword")}
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="再次输入新密码"
+                          placeholder={t(
+                            "settings.fields.confirmPasswordPlaceholder",
+                          )}
                           {...field}
                         />
                       </FormControl>
@@ -276,12 +305,17 @@ export function SettingsPage() {
                   name="avatar_url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>头像 URL</FormLabel>
+                      <FormLabel>{t("settings.fields.avatarUrl")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="输入头像图片的 URL" {...field} />
+                        <Input
+                          placeholder={t(
+                            "settings.fields.avatarUrlPlaceholder",
+                          )}
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>
-                        输入一个图片的 URL 作为你的头像
+                        {t("settings.fields.avatarUrlDescription")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -290,7 +324,9 @@ export function SettingsPage() {
 
                 <Button type="submit" disabled={updateProfile.isPending}>
                   <FiSave className="mr-2 h-4 w-4" />
-                  {updateProfile.isPending ? "保存中..." : "保存更改"}
+                  {updateProfile.isPending
+                    ? t("settings.submitting")
+                    : t("settings.submit")}
                 </Button>
               </form>
             </Form>

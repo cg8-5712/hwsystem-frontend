@@ -1,4 +1,5 @@
 import { createBrowserRouter, redirect } from "react-router";
+import { RouteErrorBoundary } from "@/components/common/RouteErrorBoundary";
 import { AppLayout } from "@/components/layout/AppLayout";
 
 // 布局组件
@@ -145,6 +146,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <DefaultLayout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       { index: true, element: <HomePage /> },
       { path: "about", element: <AboutPage /> },
@@ -158,6 +160,7 @@ export const router = createBrowserRouter([
   {
     path: "/auth",
     element: <AppLayout />,
+    errorElement: <RouteErrorBoundary />,
     loader: requireGuest,
     children: [
       { path: "login", element: <LoginPage /> },
@@ -175,6 +178,7 @@ export const router = createBrowserRouter([
         titleKey="dashboard.user.title"
       />
     ),
+    errorElement: <RouteErrorBoundary />,
     loader: requireRole(["user", "teacher", "admin"]),
     children: [
       { index: true, element: <UserIndexPage /> },
@@ -186,6 +190,16 @@ export const router = createBrowserRouter([
       {
         path: "classes/:classId/homework/:homeworkId",
         element: <HomeworkDetailPage />,
+      },
+      // 作业统计（课代表可访问）
+      {
+        path: "classes/:classId/homework/:homeworkId/stats",
+        element: <HomeworkStatsPage />,
+      },
+      // 提交列表（课代表可访问）
+      {
+        path: "classes/:classId/homework/:homeworkId/submissions",
+        element: <SubmissionListPage />,
       },
       // 提交作业
       {
@@ -206,6 +220,7 @@ export const router = createBrowserRouter([
   {
     path: "/notifications",
     element: <NotificationLayout />,
+    errorElement: <RouteErrorBoundary />,
     loader: requireRole(["user", "teacher", "admin"]),
     children: [{ index: true, element: <NotificationListPage /> }],
   },
@@ -214,6 +229,7 @@ export const router = createBrowserRouter([
   {
     path: "/settings",
     element: <SettingsLayout />,
+    errorElement: <RouteErrorBoundary />,
     loader: requireRole(["user", "teacher", "admin"]),
     children: [{ index: true, element: <SettingsPage /> }],
   },
@@ -227,6 +243,7 @@ export const router = createBrowserRouter([
         titleKey="dashboard.teacher.title"
       />
     ),
+    errorElement: <RouteErrorBoundary />,
     loader: requireRole(["teacher", "admin"]),
     children: [
       { index: true, element: <TeacherIndexPage /> },
@@ -274,6 +291,7 @@ export const router = createBrowserRouter([
         titleKey="dashboard.admin.title"
       />
     ),
+    errorElement: <RouteErrorBoundary />,
     loader: requireRole(["admin"]),
     children: [
       { path: "dashboard", element: <AdminDashboardPage /> },

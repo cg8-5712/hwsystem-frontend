@@ -3,8 +3,10 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
+import i18n from "@/app/i18n";
 import { useUserStore } from "@/stores/useUserStore";
 import type { ApiResponse } from "@/types/generated";
+import { ErrorCode } from "@/types/generated/error_code";
 import { type ApiError, getErrorMessage } from "./errors";
 
 // Token 刷新 Promise（用于防止并发刷新）
@@ -82,20 +84,44 @@ api.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // 401 未授权 - 尝试刷新 token
+    // 401 未授权 - 需要区分业务错误和 token 过期
     if (error.response?.status === 401 && originalRequest) {
-      // 避免 refresh 端点本身失败时无限循环
+      const unauthorizedError: ApiError = {
+        code: 401,
+        message: getErrorMessage(401),
+      };
+
+      // 避免 refresh 端点本身失败时无限循环（优先判断，不走业务错误分支）
       if (originalRequest.url?.includes("/auth/refresh")) {
         useUserStore.getState().clearAuthData();
         window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-        return Promise.reject(error);
+        return Promise.reject(unauthorizedError);
+      }
+
+      // 检查响应体，看是否是业务错误（如登录失败）
+      // 排除 Unauthorized(1001)，它代表 token 过期，应走刷新逻辑
+      const responseData = error.response.data as
+        | ApiResponse<unknown>
+        | undefined;
+      if (
+        responseData?.code &&
+        responseData.code !== 0 &&
+        responseData.code !== ErrorCode.Unauthorized
+      ) {
+        // 业务错误（如 AuthFailed = 2000），直接构造 ApiError 返回
+        const apiError: ApiError = {
+          code: responseData.code,
+          message: getErrorMessage(responseData.code, responseData.message),
+          timestamp: responseData.timestamp,
+        };
+        return Promise.reject(apiError);
       }
 
       // 避免重复重试
       if (originalRequest._retry) {
         useUserStore.getState().clearAuthData();
         window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-        return Promise.reject(error);
+        return Promise.reject(unauthorizedError);
       }
 
       originalRequest._retry = true;
@@ -106,10 +132,10 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${token}`;
           return api.request(originalRequest);
         })
-        .catch((refreshError) => {
+        .catch(() => {
           useUserStore.getState().clearAuthData();
           window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-          return Promise.reject(refreshError);
+          return Promise.reject(unauthorizedError);
         });
     }
 
@@ -117,14 +143,14 @@ api.interceptors.response.use(
     if (!error.response) {
       return Promise.reject({
         code: -1,
-        message: "网络错误，请检查网络连接",
+        message: i18n.t("error.network"),
       });
     }
 
     // 其他 HTTP 错误
     return Promise.reject({
       code: error.response.status,
-      message: error.message,
+      message: getErrorMessage(error.response.status, error.message),
     });
   },
 );

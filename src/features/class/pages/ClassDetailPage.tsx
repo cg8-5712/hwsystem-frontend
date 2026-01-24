@@ -71,7 +71,9 @@ export function ClassDetailPage() {
   if (classError) {
     return (
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center text-destructive">加载失败，请刷新重试</div>
+        <div className="text-center text-destructive">
+          {t("common.loadError")}
+        </div>
       </div>
     );
   }
@@ -97,7 +99,7 @@ export function ClassDetailPage() {
       <Button variant="ghost" asChild className="mb-4">
         <Link to={`${prefix}/classes`}>
           <FiArrowLeft className="mr-2 h-4 w-4" />
-          返回班级列表
+          {t("classPage.backToList")}
         </Link>
       </Button>
 
@@ -114,36 +116,40 @@ export function ClassDetailPage() {
             <Button variant="outline" asChild>
               <Link to={`${prefix}/classes/${classId}/students`}>
                 <FiUsers className="mr-2 h-4 w-4" />
-                学生管理
+                {t("classPage.studentManagement")}
               </Link>
             </Button>
             <Button variant="outline" asChild>
               <Link to={`${prefix}/classes/${classId}/edit`}>
                 <FiEdit2 className="mr-2 h-4 w-4" />
-                编辑
+                {t("classPage.edit")}
               </Link>
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive">
                   <FiTrash2 className="mr-2 h-4 w-4" />
-                  删除
+                  {t("classPage.delete")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>确认删除班级？</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {t("classPage.deleteConfirm.title")}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    此操作不可撤销。删除后，所有作业、提交和成绩数据都将被永久删除。
+                    {t("classPage.deleteConfirm.description")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>取消</AlertDialogCancel>
+                  <AlertDialogCancel>
+                    {t("classPage.deleteConfirm.cancel")}
+                  </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDeleteClass}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    删除
+                    {t("classPage.deleteConfirm.confirm")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -166,22 +172,30 @@ export function ClassDetailPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>班级信息</CardTitle>
+              <CardTitle>{t("classPage.classInfo")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground">教师</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("classPage.teacher")}
+                </p>
                 <p className="font-medium">
                   {classData?.teacher?.display_name ||
                     classData?.teacher?.username}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">成员数量</p>
-                <p className="font-medium">{classData?.member_count} 人</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("classPage.memberCount")}
+                </p>
+                <p className="font-medium">
+                  {classData?.member_count} {t("classPage.memberUnit")}
+                </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">创建时间</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("classPage.createdAt")}
+                </p>
                 <p className="font-medium">
                   {classData?.created_at &&
                     new Date(classData.created_at).toLocaleDateString()}
@@ -193,8 +207,10 @@ export function ClassDetailPage() {
           {isTeacher && classData?.invite_code && (
             <Card>
               <CardHeader>
-                <CardTitle>邀请码</CardTitle>
-                <CardDescription>分享给学生加入班级</CardDescription>
+                <CardTitle>{t("classPage.inviteCode")}</CardTitle>
+                <CardDescription>
+                  {t("classPage.inviteCodeDescription")}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">

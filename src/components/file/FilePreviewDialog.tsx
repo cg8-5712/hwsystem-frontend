@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fileService } from "@/features/file/services/fileService";
+import { isApiError } from "@/lib/errors";
 
 export interface FilePreviewDialogProps {
   file: {
@@ -81,7 +82,12 @@ export function FilePreviewDialog({ file }: FilePreviewDialogProps) {
         }
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "加载预览失败");
+          const msg = isApiError(e)
+            ? e.message
+            : e instanceof Error
+              ? e.message
+              : "加载预览失败";
+          setError(msg);
         }
       } finally {
         if (!cancelled) {

@@ -148,18 +148,28 @@ export function ClassStudentsPage() {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case "teacher":
-        return <Badge variant="default">教师</Badge>;
+        return (
+          <Badge variant="default">{t("studentsPage.roles.teacher")}</Badge>
+        );
       case "class_representative":
-        return <Badge variant="secondary">课代表</Badge>;
+        return (
+          <Badge variant="secondary">
+            {t("studentsPage.roles.representative")}
+          </Badge>
+        );
       default:
-        return <Badge variant="outline">学生</Badge>;
+        return (
+          <Badge variant="outline">{t("studentsPage.roles.student")}</Badge>
+        );
     }
   };
 
   if (error) {
     return (
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center text-destructive">加载失败，请刷新重试</div>
+        <div className="text-center text-destructive">
+          {t("common.loadError")}
+        </div>
       </div>
     );
   }
@@ -170,14 +180,14 @@ export function ClassStudentsPage() {
       <Button variant="ghost" asChild>
         <Link to={`${prefix}/classes/${classId}`}>
           <FiArrowLeft className="mr-2 h-4 w-4" />
-          返回班级详情
+          {t("studentsPage.backToDetail")}
         </Link>
       </Button>
 
       {/* 页头 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">学生管理</h1>
+          <h1 className="text-2xl font-bold">{t("studentsPage.title")}</h1>
           <p className="text-muted-foreground">{classData?.name}</p>
         </div>
         {classData?.invite_code && (
@@ -197,7 +207,9 @@ export function ClassStudentsPage() {
         <div className="flex flex-wrap gap-3">
           <Badge variant="secondary">
             <FiUsers className="mr-1 h-3 w-3" />
-            {membersData.pagination.total} 人
+            {t("studentsPage.memberCount", {
+              count: Number(membersData.pagination.total),
+            })}
           </Badge>
         </div>
       )}
@@ -209,7 +221,7 @@ export function ClassStudentsPage() {
             <div className="relative flex-1">
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="搜索姓名或用户名..."
+                placeholder={t("studentsPage.searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
@@ -220,10 +232,18 @@ export function ClassStudentsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部角色</SelectItem>
-                <SelectItem value="teacher">教师</SelectItem>
-                <SelectItem value="class_representative">课代表</SelectItem>
-                <SelectItem value="student">学生</SelectItem>
+                <SelectItem value="all">
+                  {t("studentsPage.filterAll")}
+                </SelectItem>
+                <SelectItem value="teacher">
+                  {t("studentsPage.filterTeacher")}
+                </SelectItem>
+                <SelectItem value="class_representative">
+                  {t("studentsPage.filterRepresentative")}
+                </SelectItem>
+                <SelectItem value="student">
+                  {t("studentsPage.filterStudent")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -236,11 +256,13 @@ export function ClassStudentsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>姓名</TableHead>
-                <TableHead>用户名</TableHead>
-                <TableHead>角色</TableHead>
-                <TableHead>加入时间</TableHead>
-                <TableHead className="text-right">操作</TableHead>
+                <TableHead>{t("studentsPage.tableHeader.name")}</TableHead>
+                <TableHead>{t("studentsPage.tableHeader.username")}</TableHead>
+                <TableHead>{t("studentsPage.tableHeader.role")}</TableHead>
+                <TableHead>{t("studentsPage.tableHeader.joinedAt")}</TableHead>
+                <TableHead className="text-right">
+                  {t("studentsPage.tableHeader.actions")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -273,7 +295,7 @@ export function ClassStudentsPage() {
                   >
                     <div className="flex flex-col items-center gap-2">
                       <FiUsers className="h-8 w-8" />
-                      <span>暂无成员</span>
+                      <span>{t("studentsPage.noMembers")}</span>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -303,7 +325,7 @@ export function ClassStudentsPage() {
                     <TableCell>{getRoleBadge(member.role)}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {member.joined_at
-                        ? new Date(member.joined_at).toLocaleDateString("zh-CN")
+                        ? new Date(member.joined_at).toLocaleDateString()
                         : "-"}
                     </TableCell>
                     <TableCell className="text-right">
@@ -325,7 +347,7 @@ export function ClassStudentsPage() {
                                 }
                               >
                                 <FiShield className="mr-2 h-4 w-4" />
-                                设为课代表
+                                {t("studentsPage.actions.setRepresentative")}
                               </DropdownMenuItem>
                             )}
                             {member.role === "class_representative" && (
@@ -335,7 +357,7 @@ export function ClassStudentsPage() {
                                 }
                               >
                                 <FiUser className="mr-2 h-4 w-4" />
-                                取消课代表
+                                {t("studentsPage.actions.removeRepresentative")}
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
@@ -353,7 +375,7 @@ export function ClassStudentsPage() {
                               }}
                             >
                               <FiUserMinus className="mr-2 h-4 w-4" />
-                              移除成员
+                              {t("studentsPage.actions.removeMember")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -371,19 +393,24 @@ export function ClassStudentsPage() {
       <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>确认移除成员？</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("studentsPage.removeDialog.title")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              确定要将 {selectedMember?.name}{" "}
-              从班级中移除吗？移除后，该成员的提交记录将保留，但无法再访问班级内容。
+              {t("studentsPage.removeDialog.description", {
+                name: selectedMember?.name,
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t("studentsPage.removeDialog.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRemoveMember}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              移除
+              {t("studentsPage.removeDialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

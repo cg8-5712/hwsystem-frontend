@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useApiError } from "@/hooks/useApiError";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import {
   type CreateUserRequest,
@@ -38,7 +39,7 @@ export function useUser(id: string | undefined) {
 export function useCreateUser() {
   const queryClient = useQueryClient();
   const success = useNotificationStore((s) => s.success);
-  const error = useNotificationStore((s) => s.error);
+  const { handleError } = useApiError();
 
   return useMutation({
     mutationFn: (data: CreateUserRequest) => userService.create(data),
@@ -46,8 +47,8 @@ export function useCreateUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       success("创建成功", `用户 ${user.username} 已创建`);
     },
-    onError: (err: Error) => {
-      error("创建失败", err.message);
+    onError: (err) => {
+      handleError(err, { title: "创建失败" });
     },
   });
 }
@@ -56,7 +57,7 @@ export function useCreateUser() {
 export function useUpdateUser() {
   const queryClient = useQueryClient();
   const success = useNotificationStore((s) => s.success);
-  const error = useNotificationStore((s) => s.error);
+  const { handleError } = useApiError();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateUserRequest }) =>
@@ -66,8 +67,8 @@ export function useUpdateUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.detail(user.id) });
       success("更新成功", `用户 ${user.username} 已更新`);
     },
-    onError: (err: Error) => {
-      error("更新失败", err.message);
+    onError: (err) => {
+      handleError(err, { title: "更新失败" });
     },
   });
 }
@@ -76,7 +77,7 @@ export function useUpdateUser() {
 export function useDeleteUser() {
   const queryClient = useQueryClient();
   const success = useNotificationStore((s) => s.success);
-  const error = useNotificationStore((s) => s.error);
+  const { handleError } = useApiError();
 
   return useMutation({
     mutationFn: (id: string) => userService.delete(id),
@@ -84,8 +85,8 @@ export function useDeleteUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       success("删除成功", "用户已删除");
     },
-    onError: (err: Error) => {
-      error("删除失败", err.message);
+    onError: (err) => {
+      handleError(err, { title: "删除失败" });
     },
   });
 }

@@ -72,10 +72,23 @@ export function ClassListPage() {
     }
   };
 
+  const getRoleText = (role: string) => {
+    switch (role) {
+      case "teacher":
+        return t("classPage.roleTeacher");
+      case "class_representative":
+        return t("classPage.roleRepresentative");
+      default:
+        return t("classPage.roleStudent");
+    }
+  };
+
   if (error) {
     return (
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center text-destructive">加载失败，请刷新重试</div>
+        <div className="text-center text-destructive">
+          {t("common.loadError")}
+        </div>
       </div>
     );
   }
@@ -85,25 +98,31 @@ export function ClassListPage() {
       {/* 头部 */}
       <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">我的班级</h1>
-          <p className="mt-1 text-muted-foreground">管理和查看所有班级</p>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t("classPage.title")}
+          </h1>
+          <p className="mt-1 text-muted-foreground">
+            {t("classPage.description")}
+          </p>
         </div>
         <div className="flex gap-3">
           <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
                 <FiLogIn className="mr-2 h-4 w-4" />
-                加入班级
+                {t("classPage.joinClass")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>加入班级</DialogTitle>
-                <DialogDescription>输入班级邀请码加入班级</DialogDescription>
+                <DialogTitle>{t("classPage.joinDialog.title")}</DialogTitle>
+                <DialogDescription>
+                  {t("classPage.joinDialog.description")}
+                </DialogDescription>
               </DialogHeader>
               <div className="py-4">
                 <Input
-                  placeholder="请输入邀请码"
+                  placeholder={t("classPage.joinDialog.placeholder")}
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleJoinClass()}
@@ -114,13 +133,15 @@ export function ClassListPage() {
                   variant="outline"
                   onClick={() => setIsJoinDialogOpen(false)}
                 >
-                  取消
+                  {t("classPage.joinDialog.cancel")}
                 </Button>
                 <Button
                   onClick={handleJoinClass}
                   disabled={joinClass.isPending}
                 >
-                  {joinClass.isPending ? "加入中..." : "加入"}
+                  {joinClass.isPending
+                    ? t("classPage.joinDialog.joining")
+                    : t("classPage.joinDialog.join")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -130,7 +151,7 @@ export function ClassListPage() {
             <Button asChild>
               <Link to={`${prefix}/classes/create`}>
                 <FiPlus className="mr-2 h-4 w-4" />
-                创建班级
+                {t("classPage.createClass")}
               </Link>
             </Button>
           )}
@@ -141,7 +162,7 @@ export function ClassListPage() {
       <div className="relative max-w-sm mb-6">
         <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="搜索班级..."
+          placeholder={t("classPage.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-9"
@@ -169,12 +190,12 @@ export function ClassListPage() {
           <CardContent className="py-12 text-center">
             <FiBook className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-medium text-foreground">
-              暂无班级
+              {t("classPage.noClasses")}
             </h3>
             <p className="mt-2 text-muted-foreground">
               {canCreateClass
-                ? '点击"创建班级"开始创建你的第一个班级'
-                : '点击"加入班级"使用邀请码加入班级'}
+                ? t("classPage.noClassesTeacherHint")
+                : t("classPage.noClassesStudentHint")}
             </p>
           </CardContent>
         </Card>
@@ -194,10 +215,16 @@ export function ClassListPage() {
                   <div className="flex flex-col gap-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <FiUsers className="h-4 w-4" />
-                      <span>{cls.member_count} 名成员</span>
+                      <span>
+                        {t("classPage.members", {
+                          count: Number(cls.member_count),
+                        })}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">教师：</span>
+                      <span className="font-medium">
+                        {t("classPage.teacher")}：
+                      </span>
                       <span>
                         {cls.teacher?.display_name || cls.teacher?.username}
                       </span>
@@ -206,12 +233,7 @@ export function ClassListPage() {
                       <div className="flex items-center gap-2">
                         <FiCalendar className="h-4 w-4" />
                         <span>
-                          身份：
-                          {cls.my_role === "teacher"
-                            ? "教师"
-                            : cls.my_role === "class_representative"
-                              ? "课代表"
-                              : "学生"}
+                          {t("classPage.myRole")}：{getRoleText(cls.my_role)}
                         </span>
                       </div>
                     )}

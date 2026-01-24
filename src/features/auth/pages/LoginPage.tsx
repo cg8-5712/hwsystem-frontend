@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useNotificationStore } from "@/stores/useNotificationStore";
+import { useApiError } from "@/hooks/useApiError";
 import { useUserStore } from "@/stores/useUserStore";
 
 const loginSchema = z.object({
@@ -42,7 +42,7 @@ export function LoginPage() {
 
   const login = useUserStore((s) => s.login);
   const isLoading = useUserStore((s) => s.isLoading);
-  const notifyError = useNotificationStore((s) => s.error);
+  const { handleError } = useApiError();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -63,8 +63,7 @@ export function LoginPage() {
       };
       navigate(dashboardMap[user.role] || "/");
     } catch (error: unknown) {
-      const err = error as { message?: string };
-      notifyError(t("auth.login.validation.loginFailed"), err.message);
+      handleError(error, { title: t("auth.login.validation.loginFailed") });
     }
   };
 
@@ -94,10 +93,7 @@ export function LoginPage() {
                         placeholder={t("auth.login.usernamePlaceholder")}
                       />
                     </FormControl>
-                    <FormMessage>
-                      {form.formState.errors.username?.message &&
-                        t(form.formState.errors.username.message)}
-                    </FormMessage>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -132,10 +128,7 @@ export function LoginPage() {
                         </Button>
                       </div>
                     </FormControl>
-                    <FormMessage>
-                      {form.formState.errors.password?.message &&
-                        t(form.formState.errors.password.message)}
-                    </FormMessage>
+                    <FormMessage />
                   </FormItem>
                 )}
               />

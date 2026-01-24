@@ -104,7 +104,7 @@ export function formatRelative(
  */
 export function formatDeadline(
   date: DateInput,
-  locale: string = "zh-CN",
+  _locale: string = "zh-CN",
 ): {
   text: string;
   isExpired: boolean;

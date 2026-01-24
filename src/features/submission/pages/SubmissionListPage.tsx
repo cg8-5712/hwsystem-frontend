@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useClass } from "@/features/class/hooks/useClass";
 import { useRoutePrefix } from "@/features/class/hooks/useClassBasePath";
 import {
   useHomework,
@@ -65,6 +66,7 @@ export function SubmissionListPage() {
   }>();
   const navigate = useNavigate();
   const { data: homework } = useHomework(homeworkId!);
+  const { data: classData } = useClass(classId!);
   const prefix = useRoutePrefix();
   const [selectedStudent, setSelectedStudent] =
     useState<SubmissionSummaryItemStringified | null>(null);
@@ -73,6 +75,9 @@ export function SubmissionListPage() {
   // Tab 和筛选器状态
   const [activeTab, setActiveTab] = useState<TabValue>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+
+  // 判断是否有评分权限（只有教师才能评分，课代表不能）
+  const canGrade = classData?.my_role === "teacher";
 
   const { data, isLoading, error } = useSubmissionSummary(homeworkId!);
   const { data: stats, isLoading: statsLoading } = useHomeworkStats(
@@ -178,7 +183,7 @@ export function SubmissionListPage() {
     return (
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center text-destructive">
-          {t("common.loadError") || "加载失败，请刷新重试"}
+          {t("common.loadError")}
         </div>
       </div>
     );
@@ -197,12 +202,12 @@ export function SubmissionListPage() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle>{t("submission.list.title") || "提交列表"}</CardTitle>
+              <CardTitle>{t("submission.list.title")}</CardTitle>
               <CardDescription>{homework?.title}</CardDescription>
             </div>
             <div className="text-sm text-muted-foreground">
               {t("submission.list.totalStudents", {
-                count: stats?.total_students ?? 0,
+                count: Number(stats?.total_students ?? 0),
               }) || `共 ${stats?.total_students ?? 0} 名学生`}
             </div>
           </div>
@@ -254,7 +259,7 @@ export function SubmissionListPage() {
           {activeTab === "submitted" && (
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
-                {t("submission.list.filterBy") || "筛选"}:
+                {t("submission.list.filterBy")}:
               </span>
               <Select
                 value={statusFilter}
@@ -309,6 +314,7 @@ export function SubmissionListPage() {
                       getStatusBadge={getStatusBadge}
                       onStudentClick={handleStudentClick}
                       onGradeClick={navigateToGrade}
+                      canGrade={canGrade}
                     />
                   ))}
                   {/* 未提交学生 */}
@@ -331,7 +337,7 @@ export function SubmissionListPage() {
                   {filteredSubmitted.length === 0 ? (
                     <div className="py-8 text-center text-muted-foreground">
                       <FiAlertCircle className="mx-auto h-12 w-12 mb-4" />
-                      <p>{t("submission.list.noSubmissions") || "暂无提交"}</p>
+                      <p>{t("submission.list.noSubmissions")}</p>
                     </div>
                   ) : (
                     filteredSubmitted.map((item) => (
@@ -342,6 +348,7 @@ export function SubmissionListPage() {
                         getStatusBadge={getStatusBadge}
                         onStudentClick={handleStudentClick}
                         onGradeClick={navigateToGrade}
+                        canGrade={canGrade}
                       />
                     ))
                   )}
@@ -406,7 +413,7 @@ export function SubmissionListPage() {
             {/* 版本选择器 */}
             <div className="space-y-2">
               <span className="text-sm font-medium">
-                {t("submission.list.selectVersion") || "选择版本"}
+                {t("submission.list.selectVersion")}
               </span>
               {isLoadingHistory ? (
                 <Skeleton className="h-10 w-full" />
@@ -417,9 +424,7 @@ export function SubmissionListPage() {
                 >
                   <SelectTrigger>
                     <SelectValue
-                      placeholder={
-                        t("submission.list.selectVersion") || "选择版本"
-                      }
+                      placeholder={t("submission.list.selectVersion")}
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -446,16 +451,18 @@ export function SubmissionListPage() {
                       selectedSubmission.is_late,
                     )}
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigateToGrade(selectedSubmission.id)}
-                  >
-                    <FiEdit3 className="mr-2 h-4 w-4" />
-                    {selectedStudent?.grade
-                      ? t("submission.list.editGrade") || "修改评分"
-                      : t("submission.list.goGrade") || "去批改"}
-                  </Button>
+                  {canGrade && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigateToGrade(selectedSubmission.id)}
+                    >
+                      <FiEdit3 className="mr-2 h-4 w-4" />
+                      {selectedStudent?.grade
+                        ? t("submission.list.editGrade")
+                        : t("submission.list.goGrade")}
+                    </Button>
+                  )}
                 </div>
 
                 {/* 评分信息 */}
@@ -463,7 +470,7 @@ export function SubmissionListPage() {
                   <div className="p-4 bg-muted rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-muted-foreground">
-                        {t("submission.list.score") || "评分"}
+                        {t("submission.list.score")}
                       </span>
                       <span className="text-2xl font-bold">
                         {selectedStudent.grade.score}
@@ -475,7 +482,7 @@ export function SubmissionListPage() {
                     {selectedStudent.grade.comment && (
                       <div className="mt-2 pt-2 border-t">
                         <span className="text-sm text-muted-foreground">
-                          {t("submission.list.comment") || "评语"}：
+                          {t("submission.list.comment")}：
                         </span>
                         <p className="text-sm mt-1">
                           {selectedStudent.grade.comment}
@@ -488,7 +495,7 @@ export function SubmissionListPage() {
                 {/* 提交内容预览 */}
                 <div className="space-y-2">
                   <span className="text-sm font-medium">
-                    {t("submission.list.content") || "提交内容"}
+                    {t("submission.list.content")}
                   </span>
                   <div className="p-4 bg-muted rounded-lg max-h-[300px] overflow-y-auto">
                     <pre className="whitespace-pre-wrap text-sm">
@@ -504,7 +511,7 @@ export function SubmissionListPage() {
                   selectedSubmission.attachments.length > 0 && (
                     <div className="space-y-2">
                       <span className="text-sm font-medium">
-                        {t("submission.list.attachments") || "附件"}
+                        {t("submission.list.attachments")}
                       </span>
                       <div className="space-y-1">
                         {selectedSubmission.attachments.map((attachment) => (
@@ -537,12 +544,14 @@ function SubmittedStudentCard({
   getStatusBadge,
   onStudentClick,
   onGradeClick,
+  canGrade,
 }: {
   item: SubmissionSummaryItemStringified;
   homework: { max_score?: number } | undefined;
   getStatusBadge: (status: string, isLate: boolean) => React.ReactNode;
   onStudentClick: (student: SubmissionSummaryItemStringified) => void;
   onGradeClick: (submissionId: string, e?: React.MouseEvent) => void;
+  canGrade: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -579,8 +588,7 @@ function SubmittedStudentCard({
             </span>
             <span>·</span>
             <span>
-              {t("submission.list.latest") || "最新"}: v
-              {item.latest_submission.version} (
+              {t("submission.list.latest")}: v{item.latest_submission.version} (
               {new Date(item.latest_submission.submitted_at).toLocaleString()})
             </span>
             {item.latest_submission.is_late && (
@@ -597,6 +605,7 @@ function SubmittedStudentCard({
       </div>
       <div className="flex items-center gap-3">
         {item.grade ? (
+          // 已评分：显示分数和（如果有权限）编辑按钮
           <div className="flex items-center gap-2">
             <div className="text-right">
               <p className="font-bold text-lg">
@@ -607,25 +616,30 @@ function SubmittedStudentCard({
               </p>
               {getStatusBadge("graded", item.latest_submission.is_late)}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => onGradeClick(item.latest_submission.id, e)}
-            >
-              <FiEdit3 className="h-4 w-4" />
-            </Button>
+            {canGrade && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => onGradeClick(item.latest_submission.id, e)}
+              >
+                <FiEdit3 className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         ) : (
+          // 未评分：显示状态和（如果有权限）评分按钮
           <div className="flex items-center gap-2">
             {getStatusBadge("pending", item.latest_submission.is_late)}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => onGradeClick(item.latest_submission.id, e)}
-            >
-              <FiEdit3 className="mr-2 h-4 w-4" />
-              {t("submission.list.grade") || "批改"}
-            </Button>
+            {canGrade && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => onGradeClick(item.latest_submission.id, e)}
+              >
+                <FiEdit3 className="mr-2 h-4 w-4" />
+                {t("submission.list.grade")}
+              </Button>
+            )}
           </div>
         )}
       </div>
@@ -638,7 +652,12 @@ function UnsubmittedStudentCard({
   student,
   t,
 }: {
-  student: { id: bigint; username: string; display_name: string | null };
+  student: {
+    id: string | bigint;
+    username: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  };
   t: (key: string) => string;
 }) {
   return (
@@ -670,7 +689,7 @@ function EmptyState({ t }: { t: (key: string) => string }) {
   return (
     <div className="py-8 text-center text-muted-foreground">
       <FiAlertCircle className="mx-auto h-12 w-12 mb-4" />
-      <p>{t("submission.list.noStudents") || "暂无学生"}</p>
+      <p>{t("submission.list.noStudents")}</p>
     </div>
   );
 }

@@ -34,7 +34,6 @@ import {
   useCurrentUser,
   useRoleText,
   useUserAvatar,
-  useUserAvatarColor,
   useUserStore,
 } from "@/stores/useUserStore";
 
@@ -90,7 +89,6 @@ export function DashboardHeader() {
   const currentUser = useCurrentUser();
   const logout = useUserStore((s) => s.logout);
   const avatar = useUserAvatar();
-  const avatarColor = useUserAvatarColor();
   const roleText = useRoleText();
 
   const { theme, setTheme, isDark } = useDarkMode();

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
@@ -49,44 +49,24 @@ import { useCreateGrade, useGrade, useUpdateGrade } from "../hooks/useGrade";
 
 // 快速评分预设
 const QUICK_SCORES = [
-  { label: "优秀", score: 100, color: "bg-green-500" },
-  { label: "良好", score: 85, color: "bg-blue-500" },
-  { label: "中等", score: 75, color: "bg-yellow-500" },
-  { label: "及格", score: 60, color: "bg-orange-500" },
+  { key: "excellent", score: 100, color: "bg-green-500" },
+  { key: "good", score: 85, color: "bg-blue-500" },
+  { key: "average", score: 75, color: "bg-yellow-500" },
+  { key: "pass", score: 60, color: "bg-orange-500" },
 ] as const;
 
-// 常用评语模板
-const COMMENT_TEMPLATES = [
-  {
-    id: "excellent",
-    label: "完成度高，代码规范",
-    value: "完成度高，代码规范，逻辑清晰。继续保持！",
-  },
-  {
-    id: "good",
-    label: "整体不错，有小问题",
-    value: "整体完成度不错，但有一些小问题需要改进。建议仔细检查细节。",
-  },
-  {
-    id: "needImprove",
-    label: "需要改进",
-    value: "作业完成度一般，需要加强理解和练习。建议课后多复习相关内容。",
-  },
-  {
-    id: "late",
-    label: "迟交扣分",
-    value: "作业迟交，已酌情扣分。请注意按时提交。",
-  },
-  {
-    id: "incomplete",
-    label: "不完整",
-    value: "作业不完整，缺少关键部分。请补充完整后重新提交。",
-  },
+// 常用评语模板 keys
+const COMMENT_TEMPLATE_KEYS = [
+  "excellent",
+  "good",
+  "needImprove",
+  "late",
+  "incomplete",
 ] as const;
 
 const formSchema = z.object({
-  score: z.number().min(0, "分数不能为负"),
-  comment: z.string().max(1000, "评语不能超过1000个字符").optional(),
+  score: z.number().min(0),
+  comment: z.string().max(1000).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -213,36 +193,29 @@ export function GradePage() {
           score: values.score,
           comment: values.comment || null,
         });
-        notify.success(t("grade.success.updated") || "评分已更新");
+        notify.success(t("grade.success.updated"));
       } else {
         await createGrade.mutateAsync({
           score: values.score,
           comment: values.comment || null,
         });
-        notify.success(t("grade.success.created") || "评分成功");
+        notify.success(t("grade.success.created"));
       }
 
       // 批改完成后的行为
       if (navigationInfo?.next) {
         // 还有下一个，提示并可以继续
-        notify.info(
-          t("grade.navigation.continueHint") || "可点击「下一个」继续批改",
-        );
+        notify.info(t("grade.navigation.continueHint"));
       } else if (navigationInfo && !navigationInfo.next) {
         // 已完成所有
-        notify.success(
-          t("grade.navigation.allCompleted") || "所有待批改作业已完成！",
-        );
+        notify.success(t("grade.navigation.allCompleted"));
         goBackToList();
       } else {
         // 没有导航状态，直接返回
         navigate(-1);
       }
     } catch {
-      notify.error(
-        t("grade.error.failed") || "操作失败",
-        t("grade.error.retry") || "请稍后重试",
-      );
+      notify.error(t("grade.error.failed"), t("grade.error.retry"));
     }
   };
 
@@ -286,7 +259,7 @@ export function GradePage() {
             <Badge variant="secondary">
               {navigationInfo.current}/{navigationInfo.total}
             </Badge>
-            <span>{t("grade.navigation.pendingCount") || "待批改"}</span>
+            <span>{t("grade.navigation.pendingCount")}</span>
           </div>
 
           <Button
@@ -326,21 +299,19 @@ export function GradePage() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>
-                  {t("grade.submissionContent") || "提交内容"}
-                </CardTitle>
+                <CardTitle>{t("grade.submissionContent")}</CardTitle>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">v{submission?.version}</Badge>
                   {submission?.is_late && (
                     <span className="flex items-center gap-1 text-orange-600 font-medium">
                       <FiClock className="h-4 w-4" />
-                      {t("submission.list.filter.late") || "迟交"}
+                      {t("submission.list.filter.late")}
                     </span>
                   )}
                 </div>
               </div>
               <CardDescription>
-                {t("grade.submittedAt") || "提交于"}{" "}
+                {t("grade.submittedAt")}{" "}
                 {submission?.submitted_at &&
                   new Date(submission.submitted_at).toLocaleString()}
               </CardDescription>
@@ -351,16 +322,13 @@ export function GradePage() {
                   {submission.content}
                 </div>
               ) : (
-                <p className="text-muted-foreground">
-                  {t("grade.noContent") || "无文字内容"}
-                </p>
+                <p className="text-muted-foreground">{t("grade.noContent")}</p>
               )}
 
               {submission?.attachments && submission.attachments.length > 0 && (
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-2">
-                    {t("grade.attachments") || "附件"} (
-                    {submission.attachments.length})
+                    {t("grade.attachments")} ({submission.attachments.length})
                   </p>
                   <div className="space-y-2">
                     {submission.attachments.map((file) => (
@@ -381,7 +349,7 @@ export function GradePage() {
           {/* 学生信息 */}
           <Card>
             <CardHeader>
-              <CardTitle>{t("grade.studentInfo") || "学生信息"}</CardTitle>
+              <CardTitle>{t("grade.studentInfo")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-3">
@@ -412,14 +380,11 @@ export function GradePage() {
           <Card>
             <CardHeader>
               <CardTitle>
-                {isEditing
-                  ? t("grade.editGrade") || "修改评分"
-                  : t("grade.grade") || "评分"}
+                {isEditing ? t("grade.editGrade") : t("grade.grade")}
               </CardTitle>
               <CardDescription>
-                {t("grade.maxScore") || "满分"}{" "}
-                {submission?.homework?.max_score || 100}{" "}
-                {t("grade.points") || "分"}
+                {t("grade.maxScore")} {submission?.homework?.max_score || 100}{" "}
+                {t("grade.points")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -433,7 +398,7 @@ export function GradePage() {
                     name="score"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("grade.score") || "分数"}</FormLabel>
+                        <FormLabel>{t("grade.score")}</FormLabel>
                         {/* 快速评分按钮 */}
                         <div className="flex flex-wrap gap-2 mb-2">
                           {QUICK_SCORES.map((preset) => {
@@ -445,7 +410,7 @@ export function GradePage() {
                             );
                             return (
                               <Button
-                                key={preset.label}
+                                key={preset.key}
                                 type="button"
                                 variant={
                                   field.value === actualScore
@@ -459,7 +424,8 @@ export function GradePage() {
                                 <span
                                   className={`w-2 h-2 rounded-full ${preset.color} mr-1.5`}
                                 />
-                                {preset.label} ({actualScore})
+                                {t(`grade.quickScore.${preset.key}`)} (
+                                {actualScore})
                               </Button>
                             );
                           })}
@@ -477,7 +443,7 @@ export function GradePage() {
                         </FormControl>
                         <FormDescription>
                           0 - {submission?.homework?.max_score || 100}{" "}
-                          {t("grade.points") || "分"}
+                          {t("grade.points")}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -490,45 +456,40 @@ export function GradePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          {t("grade.comment") || "评语"}（
-                          {t("grade.optional") || "可选"}）
+                          {t("grade.comment")}（{t("grade.optional")}）
                         </FormLabel>
                         {/* 常用评语下拉 */}
                         <Select
                           onValueChange={(value) => {
-                            const template = COMMENT_TEMPLATES.find(
-                              (t) => t.id === value,
+                            const templateValue = t(
+                              `grade.commentTemplates.${value}.value`,
                             );
-                            if (template) {
+                            if (templateValue) {
                               // 追加到现有评语（如果有的话）
                               const currentComment = field.value || "";
                               const newComment = currentComment
-                                ? `${currentComment}\n${template.value}`
-                                : template.value;
+                                ? `${currentComment}\n${templateValue}`
+                                : templateValue;
                               field.onChange(newComment);
                             }
                           }}
                         >
                           <SelectTrigger className="w-full mb-2">
                             <SelectValue
-                              placeholder={
-                                t("grade.selectTemplate") || "选择常用评语..."
-                              }
+                              placeholder={t("grade.selectTemplate")}
                             />
                           </SelectTrigger>
                           <SelectContent>
-                            {COMMENT_TEMPLATES.map((template) => (
-                              <SelectItem key={template.id} value={template.id}>
-                                {template.label}
+                            {COMMENT_TEMPLATE_KEYS.map((key) => (
+                              <SelectItem key={key} value={key}>
+                                {t(`grade.commentTemplates.${key}.label`)}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                         <FormControl>
                           <Textarea
-                            placeholder={
-                              t("grade.commentPlaceholder") || "给学生的反馈..."
-                            }
+                            placeholder={t("grade.commentPlaceholder")}
                             rows={4}
                             {...field}
                           />
@@ -553,10 +514,10 @@ export function GradePage() {
                       disabled={isPending}
                     >
                       {isPending
-                        ? t("grade.submitting") || "提交中..."
+                        ? t("grade.submitting")
                         : isEditing
-                          ? t("grade.updateGrade") || "更新评分"
-                          : t("grade.submitGrade") || "提交评分"}
+                          ? t("grade.updateGrade")
+                          : t("grade.submitGrade")}
                     </Button>
                   </div>
                 </form>
@@ -572,7 +533,7 @@ export function GradePage() {
               <kbd className="px-1.5 py-0.5 rounded bg-muted border">←</kbd>
               {" / "}
               <kbd className="px-1.5 py-0.5 rounded bg-muted border">→</kbd>{" "}
-              {t("grade.navigation.shortcutHint") || "快速切换"}
+              {t("grade.navigation.shortcutHint")}
             </div>
           )}
         </div>

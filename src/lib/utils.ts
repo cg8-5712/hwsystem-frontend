@@ -1,6 +1,7 @@
 // 通用工具函数
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import i18n from "@/app/i18n";
 
 /**
  * 合并 Tailwind CSS 类名
@@ -83,16 +84,19 @@ export function getDeadlineStatus(deadline: string | null): {
 /**
  * 格式化剩余时间为可读字符串
  */
-export function formatRemainingTime(ms: number, locale = "zh"): string {
+export function formatRemainingTime(ms: number, locale?: string): string {
   const abs = Math.abs(ms);
   const minutes = Math.floor(abs / (60 * 1000));
   const hours = Math.floor(abs / (60 * 60 * 1000));
   const days = Math.floor(abs / (24 * 60 * 60 * 1000));
 
-  if (locale === "zh") {
-    if (days > 0) return `${days}天`;
-    if (hours > 0) return `${hours}小时`;
-    return `${minutes}分钟`;
+  // 根据 locale 参数或当前 i18n 语言决定格式
+  const isZh = locale === "zh" || (!locale && i18n.language?.startsWith("zh"));
+
+  if (isZh) {
+    if (days > 0) return `${days}${i18n.t("time.days")}`;
+    if (hours > 0) return `${hours}${i18n.t("time.hours")}`;
+    return `${minutes}${i18n.t("time.minutes")}`;
   }
   if (days > 0) return `${days}d`;
   if (hours > 0) return `${hours}h`;

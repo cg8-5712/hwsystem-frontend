@@ -1,3 +1,4 @@
+import i18n from "@/app/i18n";
 import { ErrorCode } from "@/types/generated";
 
 /** API 错误对象类型 */
@@ -17,53 +18,56 @@ export function isApiError(error: unknown): error is ApiError {
   );
 }
 
-/** 错误码→友好消息映射 */
-const errorMessages: Partial<Record<ErrorCode, string>> = {
+/** 错误码→i18n key 映射 */
+const errorCodeToI18nKey: Partial<Record<ErrorCode, string>> = {
   // 通用
-  [ErrorCode.BadRequest]: "请求参数错误",
-  [ErrorCode.Unauthorized]: "请先登录",
-  [ErrorCode.Forbidden]: "权限不足",
-  [ErrorCode.NotFound]: "资源不存在",
-  [ErrorCode.InternalServerError]: "服务器内部错误，请稍后重试",
-  [ErrorCode.Conflict]: "资源冲突",
-  [ErrorCode.RateLimitExceeded]: "请求过于频繁，请稍后再试",
+  [ErrorCode.BadRequest]: "error.badRequest",
+  [ErrorCode.Unauthorized]: "error.unauthorized",
+  [ErrorCode.Forbidden]: "error.forbidden",
+  [ErrorCode.NotFound]: "error.notFoundResource",
+  [ErrorCode.InternalServerError]: "error.serverError",
+  [ErrorCode.Conflict]: "error.conflict",
+  [ErrorCode.RateLimitExceeded]: "error.rateLimitExceeded",
   // 认证
-  [ErrorCode.AuthFailed]: "用户名或密码错误",
-  [ErrorCode.RegisterFailed]: "注册失败，请重试",
-  [ErrorCode.PasswordPolicyViolation]:
-    "密码不符合要求（需包含大小写字母和数字，至少8位）",
+  [ErrorCode.AuthFailed]: "error.authFailed",
+  [ErrorCode.RegisterFailed]: "error.registerFailed",
+  [ErrorCode.PasswordPolicyViolation]: "error.passwordPolicyViolation",
   // 文件
-  [ErrorCode.FileNotFound]: "文件不存在",
-  [ErrorCode.FileUploadFailed]: "文件上传失败",
-  [ErrorCode.FileTypeNotAllowed]: "不支持的文件类型",
-  [ErrorCode.FileSizeExceeded]: "文件大小超出限制",
-  [ErrorCode.MuitifileUploadNotAllowed]: "不支持多文件上传",
+  [ErrorCode.FileNotFound]: "error.fileNotFound",
+  [ErrorCode.FileUploadFailed]: "error.fileUploadFailed",
+  [ErrorCode.FileTypeNotAllowed]: "error.fileTypeNotAllowed",
+  [ErrorCode.FileSizeExceeded]: "error.fileSizeExceeded",
+  [ErrorCode.MuitifileUploadNotAllowed]: "error.multifileUploadNotAllowed",
   // 用户
-  [ErrorCode.UserNotFound]: "用户不存在",
-  [ErrorCode.UserAlreadyExists]: "用户已存在",
-  [ErrorCode.UserUpdateFailed]: "用户信息更新失败",
-  [ErrorCode.UserDeleteFailed]: "用户删除失败",
-  [ErrorCode.UserCreationFailed]: "用户创建失败",
-  [ErrorCode.CanNotDeleteCurrentUser]: "不能删除当前登录用户",
-  [ErrorCode.UserNameInvalid]: "用户名格式无效",
-  [ErrorCode.UserNameAlreadyExists]: "用户名已被占用",
-  [ErrorCode.UserEmailInvalid]: "邮箱格式无效",
-  [ErrorCode.UserEmailAlreadyExists]: "邮箱已被占用",
+  [ErrorCode.UserNotFound]: "error.userNotFound",
+  [ErrorCode.UserAlreadyExists]: "error.userAlreadyExists",
+  [ErrorCode.UserUpdateFailed]: "error.userUpdateFailed",
+  [ErrorCode.UserDeleteFailed]: "error.userDeleteFailed",
+  [ErrorCode.UserCreationFailed]: "error.userCreationFailed",
+  [ErrorCode.CanNotDeleteCurrentUser]: "error.canNotDeleteCurrentUser",
+  [ErrorCode.UserNameInvalid]: "error.userNameInvalid",
+  [ErrorCode.UserNameAlreadyExists]: "error.userNameAlreadyExists",
+  [ErrorCode.UserEmailInvalid]: "error.userEmailInvalid",
+  [ErrorCode.UserEmailAlreadyExists]: "error.userEmailAlreadyExists",
   // 班级
-  [ErrorCode.ClassNotFound]: "班级不存在",
-  [ErrorCode.ClassAlreadyExists]: "班级已存在",
-  [ErrorCode.ClassCreationFailed]: "班级创建失败",
-  [ErrorCode.ClassUpdateFailed]: "班级更新失败",
-  [ErrorCode.ClassDeleteFailed]: "班级删除失败",
-  [ErrorCode.ClassPermissionDenied]: "无权操作该班级",
-  [ErrorCode.ClassJoinFailed]: "加入班级失败",
-  [ErrorCode.ClassInviteCodeInvalid]: "邀请码无效",
-  [ErrorCode.ClassAlreadyJoined]: "已加入该班级",
-  [ErrorCode.ClassJoinForbidden]: "不允许加入该班级",
-  [ErrorCode.ClassUserNotFound]: "班级成员不存在",
+  [ErrorCode.ClassNotFound]: "error.classNotFound",
+  [ErrorCode.ClassAlreadyExists]: "error.classAlreadyExists",
+  [ErrorCode.ClassCreationFailed]: "error.classCreationFailed",
+  [ErrorCode.ClassUpdateFailed]: "error.classUpdateFailed",
+  [ErrorCode.ClassDeleteFailed]: "error.classDeleteFailed",
+  [ErrorCode.ClassPermissionDenied]: "error.classPermissionDenied",
+  [ErrorCode.ClassJoinFailed]: "error.classJoinFailed",
+  [ErrorCode.ClassInviteCodeInvalid]: "error.classInviteCodeInvalid",
+  [ErrorCode.ClassAlreadyJoined]: "error.classAlreadyJoined",
+  [ErrorCode.ClassJoinForbidden]: "error.classJoinForbidden",
+  [ErrorCode.ClassUserNotFound]: "error.classUserNotFound",
 };
 
 /** 获取友好错误消息 */
 export function getErrorMessage(code: number, fallback?: string): string {
-  return errorMessages[code as ErrorCode] ?? fallback ?? "操作失败，请稍后重试";
+  const i18nKey = errorCodeToI18nKey[code as ErrorCode];
+  if (i18nKey) {
+    return i18n.t(i18nKey);
+  }
+  return fallback ?? i18n.t("error.default");
 }

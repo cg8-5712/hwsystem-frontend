@@ -37,7 +37,6 @@ import {
   useCurrentUser,
   useRoleText,
   useUserAvatar,
-  useUserAvatarColor,
   useUserStore,
 } from "@/stores/useUserStore";
 
@@ -62,7 +61,6 @@ export function DashboardLayout({ navItems, titleKey }: DashboardLayoutProps) {
   const currentUser = useCurrentUser();
   const logout = useUserStore((s) => s.logout);
   const avatar = useUserAvatar();
-  const avatarColor = useUserAvatarColor();
   const roleText = useRoleText();
 
   const handleLogout = () => {

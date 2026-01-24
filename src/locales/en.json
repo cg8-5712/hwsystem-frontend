@@ -228,6 +228,12 @@
         "message": "Welcome back, {{name}}! Redirecting to dashboard..."
       }
     },
+    "logout": {
+      "success": {
+        "title": "Logged Out Successfully",
+        "message": "Goodbye, {{name}}! We look forward to your next visit."
+      }
+    },
     "forgotPassword": {
       "title": "Forgot Password",
       "subtitle": "Enter your username and we'll help you reset your password",
@@ -729,6 +735,46 @@
     "backHome": "Back to Home"
   },
   "error": {
+    "network": "Network error, please check your connection",
+    "timeout": "Request timeout",
+    "default": "Operation failed, please try again later",
+    "unauthorized": "Please login first",
+    "forbidden": "Permission denied",
+    "notFoundResource": "Resource not found",
+    "serverError": "Internal server error",
+    "badRequest": "Bad request",
+    "conflict": "Resource conflict",
+    "rateLimitExceeded": "Too many requests, please try again later",
+    "authFailed": "Invalid username or password",
+    "registerFailed": "Registration failed, please try again",
+    "passwordPolicyViolation": "Password must contain uppercase, lowercase letters and numbers, at least 8 characters",
+    "fileNotFound": "File not found",
+    "fileUploadFailed": "File upload failed",
+    "fileTypeNotAllowed": "File type not allowed",
+    "fileSizeExceeded": "File size exceeded",
+    "multifileUploadNotAllowed": "Multiple file upload not allowed",
+    "userNotFound": "User not found",
+    "userAlreadyExists": "User already exists",
+    "userUpdateFailed": "User update failed",
+    "userDeleteFailed": "User delete failed",
+    "userCreationFailed": "User creation failed",
+    "canNotDeleteCurrentUser": "Cannot delete current user",
+    "userNameInvalid": "Invalid username format",
+    "userNameAlreadyExists": "Username already taken",
+    "userEmailInvalid": "Invalid email format",
+    "userEmailAlreadyExists": "Email already taken",
+    "classNotFound": "Class not found",
+    "classAlreadyExists": "Class already exists",
+    "classCreationFailed": "Class creation failed",
+    "classUpdateFailed": "Class update failed",
+    "classDeleteFailed": "Class delete failed",
+    "classPermissionDenied": "No permission for this class",
+    "classJoinFailed": "Failed to join class",
+    "classInviteCodeInvalid": "Invalid invite code",
+    "classAlreadyJoined": "Already joined this class",
+    "classJoinForbidden": "Not allowed to join this class",
+    "classUserNotFound": "Class member not found",
+    "refreshUserInfoFailed": "Failed to refresh user info",
     "notFound": {
       "title": "Page Not Found",
       "description": "Sorry, the page you are looking for doesn't exist. The link might be broken or the page may have been moved.",
@@ -737,6 +783,44 @@
       "goHome": "Go Home",
       "suggestions": "You might want to visit these pages:"
     }
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "description": "Sorry, the page encountered some issues. Please try refreshing or return to homepage.",
+    "retry": "Retry",
+    "refresh": "Refresh Page",
+    "backHome": "Back to Home"
+  },
+  "role": {
+    "admin": "Admin",
+    "teacher": "Teacher",
+    "student": "Student",
+    "user": "User"
+  },
+  "status": {
+    "active": "Active",
+    "suspended": "Suspended",
+    "banned": "Banned"
+  },
+  "time": {
+    "days": "days",
+    "hours": "hours",
+    "minutes": "minutes"
+  },
+  "validation": {
+    "required": "This field is required",
+    "maxLength": "Cannot exceed {{max}} characters",
+    "minLength": "Must be at least {{min}} characters",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidUrl": "Please enter a valid URL",
+    "passwordMismatch": "Passwords do not match",
+    "positiveNumber": "Please enter a positive number",
+    "scoreRange": "Score must be between 0 and {{max}}"
+  },
+  "avatar": {
+    "admin": "A",
+    "teacher": "T",
+    "user": "U"
   },
   "admin": {
     "classes": {
@@ -819,18 +903,227 @@
     },
     "submitted": "Submitted",
     "pendingGrade": "Pending",
+    "grade": "Grade",
     "noActive": "No active homework",
     "noExpired": "No expired homework",
     "noHomeworks": "No homework assigned yet",
     "actions": {
       "edit": "Edit",
       "stats": "Statistics",
-      "delete": "Delete"
+      "delete": "Delete",
+      "submissions": "View Submissions"
     },
     "deleteConfirm": {
       "title": "Delete homework?",
       "description": "\"{{title}}\" will be permanently deleted."
     }
+  },
+  "settings": {
+    "title": "Account Settings",
+    "subtitle": "Manage your profile and account information",
+    "profile": {
+      "title": "Profile",
+      "description": "Update your display name, email and password"
+    },
+    "fields": {
+      "username": "Username",
+      "usernameReadonly": "Username cannot be changed after creation",
+      "displayName": "Display Name",
+      "displayNamePlaceholder": "Enter display name",
+      "displayNameDescription": "This is the name displayed in the system, can be your real name or nickname",
+      "email": "Email",
+      "emailPlaceholder": "Enter email address",
+      "password": "New Password",
+      "passwordPlaceholder": "Leave blank to keep current password",
+      "passwordDescription": "At least 6 characters, leave blank to keep current password",
+      "confirmPassword": "Confirm New Password",
+      "confirmPasswordPlaceholder": "Enter new password again",
+      "avatarUrl": "Avatar URL",
+      "avatarUrlPlaceholder": "Enter avatar image URL",
+      "avatarUrlDescription": "Enter an image URL as your avatar"
+    },
+    "validation": {
+      "displayNameMaxLength": "Display name cannot exceed 50 characters",
+      "invalidEmail": "Please enter a valid email address",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "passwordMismatch": "Passwords do not match",
+      "invalidUrl": "Please enter a valid URL"
+    },
+    "submit": "Save Changes",
+    "submitting": "Saving..."
+  },
+  "classPage": {
+    "title": "My Classes",
+    "description": "Manage and view all classes",
+    "joinClass": "Join Class",
+    "createClass": "Create Class",
+    "searchPlaceholder": "Search classes...",
+    "noClasses": "No classes",
+    "noClassesTeacherHint": "Click \"Create Class\" to create your first class",
+    "noClassesStudentHint": "Click \"Join Class\" to join a class with invite code",
+    "members": "{{count}} members",
+    "teacher": "Teacher",
+    "myRole": "Role",
+    "roleTeacher": "Teacher",
+    "roleRepresentative": "Representative",
+    "roleStudent": "Student",
+    "joinDialog": {
+      "title": "Join Class",
+      "description": "Enter the invite code to join a class",
+      "placeholder": "Enter invite code",
+      "cancel": "Cancel",
+      "joining": "Joining...",
+      "join": "Join"
+    },
+    "backToList": "Back to Classes",
+    "studentManagement": "Students",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": {
+      "title": "Delete class?",
+      "description": "This action cannot be undone. All homework, submissions and grades will be permanently deleted.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "classInfo": "Class Info",
+    "memberCount": "Members",
+    "memberUnit": "",
+    "createdAt": "Created",
+    "inviteCode": "Invite Code",
+    "inviteCodeDescription": "Share with students to join"
+  },
+  "studentsPage": {
+    "title": "Student Management",
+    "backToDetail": "Back to Class",
+    "searchPlaceholder": "Search name or username...",
+    "filterAll": "All Roles",
+    "filterTeacher": "Teacher",
+    "filterRepresentative": "Representative",
+    "filterStudent": "Student",
+    "memberCount": "{{count}} members",
+    "noMembers": "No members",
+    "tableHeader": {
+      "name": "Name",
+      "username": "Username",
+      "role": "Role",
+      "joinedAt": "Joined",
+      "actions": "Actions"
+    },
+    "roles": {
+      "teacher": "Teacher",
+      "representative": "Representative",
+      "student": "Student"
+    },
+    "actions": {
+      "setRepresentative": "Set as Representative",
+      "removeRepresentative": "Remove Representative",
+      "removeMember": "Remove Member"
+    },
+    "removeDialog": {
+      "title": "Remove member?",
+      "description": "Are you sure you want to remove {{name}} from the class? Their submission records will be kept but they will no longer have access.",
+      "cancel": "Cancel",
+      "confirm": "Remove"
+    }
+  },
+  "classEditPage": {
+    "title": "Edit Class",
+    "description": "Modify class name and description",
+    "backToDetail": "Back to Class",
+    "fields": {
+      "name": "Class Name",
+      "namePlaceholder": "e.g. Data Structures Spring 2026",
+      "nameDescription": "Give your class a clear name",
+      "descriptionLabel": "Description (Optional)",
+      "descriptionPlaceholder": "Add class description, schedule, etc."
+    },
+    "validation": {
+      "nameRequired": "Please enter class name",
+      "nameMaxLength": "Class name cannot exceed 100 characters",
+      "descriptionMaxLength": "Description cannot exceed 500 characters"
+    },
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "save": "Save Changes"
+  },
+  "homeworkStats": {
+    "title": "Homework Statistics",
+    "backToDetail": "Back to Homework",
+    "stats": {
+      "totalStudents": "Total Students",
+      "submitted": "Submitted",
+      "graded": "Graded",
+      "late": "Late"
+    },
+    "submissionRate": {
+      "title": "Submission Rate",
+      "description": "{{submitted}} / {{total}} submitted"
+    },
+    "scoreStats": {
+      "title": "Score Statistics",
+      "description": "Based on graded submissions",
+      "average": "Average",
+      "max": "Highest",
+      "min": "Lowest"
+    },
+    "scoreDistribution": {
+      "title": "Score Distribution",
+      "description": "Based on {{count}} graded submissions",
+      "noData": "No data",
+      "count": "Count",
+      "range": "Score Range"
+    },
+    "unsubmitted": {
+      "title": "Unsubmitted",
+      "description": "{{count}} not submitted",
+      "badge": "Not Submitted",
+      "allSubmitted": "All students have submitted"
+    },
+    "pieChart": {
+      "submitted": "Submitted",
+      "unsubmitted": "Not Submitted"
+    }
+  },
+  "homeworkPage": {
+    "backToClass": "Back to Class",
+    "maxScore": "Max score: {{score}}",
+    "noDescription": "No description",
+    "attachments": "Attachments",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": {
+      "title": "Delete homework?",
+      "description": "All student submissions and grades will be permanently deleted.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "status": {
+      "expired": "Expired",
+      "expiringSoon": "Expiring Soon",
+      "inProgress": "In Progress"
+    },
+    "mySubmission": "My Submission",
+    "submissionVersion": "Submission #{{version}}",
+    "submittedAt": "Submitted at",
+    "pendingGrade": "Pending",
+    "teacherComment": "Teacher's Comment",
+    "viewHistory": "View History",
+    "resubmit": "Resubmit",
+    "notSubmitted": "You haven't submitted yet",
+    "submitHomework": "Submit",
+    "deadlinePassed": "Deadline passed, cannot submit",
+    "homeworkInfo": "Homework Info",
+    "creator": "Created by",
+    "deadline": "Deadline",
+    "noDeadline": "No deadline",
+    "allowLate": "Late submission",
+    "yes": "Yes",
+    "no": "No",
+    "attachmentCount": "Attachments",
+    "attachmentUnit": "",
+    "submissionManagement": "Submissions",
+    "viewSubmissions": "View Submissions",
+    "homeworkStats": "Statistics"
   },
   "nav": {
     "home": "Home",
@@ -865,6 +1158,7 @@
       "selectVersion": "Select version",
       "viewGrade": "View Grade",
       "goGrade": "Grade",
+      "editGrade": "Edit Grade",
       "grade": "Grade",
       "score": "Score",
       "comment": "Comment",
@@ -890,6 +1184,35 @@
     "submitting": "Submitting...",
     "updateGrade": "Update Grade",
     "submitGrade": "Submit Grade",
+    "selectTemplate": "Select comment template...",
+    "quickScore": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "average": "Average",
+      "pass": "Pass"
+    },
+    "commentTemplates": {
+      "excellent": {
+        "label": "Well done, clean code",
+        "value": "Well completed, clean code, clear logic. Keep it up!"
+      },
+      "good": {
+        "label": "Good overall, minor issues",
+        "value": "Good overall, but some minor issues need improvement. Please check the details."
+      },
+      "needImprove": {
+        "label": "Needs improvement",
+        "value": "Average completion, needs more understanding and practice. Please review the related content."
+      },
+      "late": {
+        "label": "Late submission",
+        "value": "Late submission, points deducted accordingly. Please submit on time."
+      },
+      "incomplete": {
+        "label": "Incomplete",
+        "value": "Incomplete work, missing key parts. Please complete and resubmit."
+      }
+    },
     "success": {
       "created": "Grade submitted",
       "updated": "Grade updated"

@@ -29,7 +29,6 @@ import {
   useIsAuthenticated,
   useRoleText,
   useUserAvatar,
-  useUserAvatarColor,
   useUserStore,
 } from "@/stores/useUserStore";
 
@@ -44,7 +43,6 @@ export function AppHeader() {
   const dashboardPath = useDashboardPath();
   const roleText = useRoleText();
   const avatar = useUserAvatar();
-  const avatarColor = useUserAvatarColor();
 
   const { theme, setTheme, isDark } = useDarkMode();
 

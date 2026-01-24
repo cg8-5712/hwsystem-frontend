@@ -60,6 +60,13 @@ export function HomeworkDetailPage() {
   // 保留原判断用于权限控制（如删除按钮）
   const hasTeacherPermission =
     classData?.teacher?.id === user?.id || canDeleteHomework;
+  // 是否可以查看提交情况（教师、课代表、管理员）
+  const canViewSubmissions =
+    isTeacherView ||
+    classData?.my_role === "class_representative" ||
+    classData?.my_role === "teacher";
+  // 是否可以编辑/删除作业（仅教师和管理员）
+  const canEditHomework = isTeacherView && hasTeacherPermission;
   const isDeadlinePassed = homework?.deadline
     ? new Date(homework.deadline) < new Date()
     : false;
@@ -80,19 +87,29 @@ export function HomeworkDetailPage() {
     const deadline = new Date(homework.deadline);
     const now = new Date();
     if (now > deadline) {
-      return <Badge variant="destructive">已截止</Badge>;
+      return (
+        <Badge variant="destructive">{t("homeworkPage.status.expired")}</Badge>
+      );
     }
     const hoursLeft = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
     if (hoursLeft < 24) {
-      return <Badge variant="secondary">即将截止</Badge>;
+      return (
+        <Badge variant="secondary">
+          {t("homeworkPage.status.expiringSoon")}
+        </Badge>
+      );
     }
-    return <Badge variant="default">进行中</Badge>;
+    return (
+      <Badge variant="default">{t("homeworkPage.status.inProgress")}</Badge>
+    );
   };
 
   if (error) {
     return (
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center text-destructive">加载失败，请刷新重试</div>
+        <div className="text-center text-destructive">
+          {t("common.loadError")}
+        </div>
       </div>
     );
   }
@@ -111,7 +128,7 @@ export function HomeworkDetailPage() {
       <Button variant="ghost" asChild className="mb-4">
         <Link to={`${prefix}/classes/${classId}`}>
           <FiArrowLeft className="mr-2 h-4 w-4" />
-          返回班级
+          {t("homeworkPage.backToClass")}
         </Link>
       </Button>
 
@@ -124,42 +141,46 @@ export function HomeworkDetailPage() {
                 <div>
                   <CardTitle className="text-xl">{homework?.title}</CardTitle>
                   <CardDescription className="mt-2">
-                    满分 {homework?.max_score} 分
+                    {t("homeworkPage.maxScore", { score: homework?.max_score })}
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   {getStatusBadge()}
-                  {isTeacherView && hasTeacherPermission && (
+                  {canEditHomework && (
                     <>
                       <Button variant="outline" size="sm" asChild>
                         <Link
                           to={`${prefix}/classes/${classId}/homework/${homeworkId}/edit`}
                         >
                           <FiEdit2 className="mr-2 h-4 w-4" />
-                          编辑
+                          {t("homeworkPage.edit")}
                         </Link>
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="destructive" size="sm">
                             <FiTrash2 className="mr-2 h-4 w-4" />
-                            删除
+                            {t("homeworkPage.delete")}
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>确认删除作业？</AlertDialogTitle>
+                            <AlertDialogTitle>
+                              {t("homeworkPage.deleteConfirm.title")}
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
-                              删除后，所有学生的提交记录和成绩都将被永久删除。
+                              {t("homeworkPage.deleteConfirm.description")}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>取消</AlertDialogCancel>
+                            <AlertDialogCancel>
+                              {t("homeworkPage.deleteConfirm.cancel")}
+                            </AlertDialogCancel>
                             <AlertDialogAction
                               onClick={handleDelete}
                               className="bg-destructive text-destructive-foreground"
                             >
-                              删除
+                              {t("homeworkPage.deleteConfirm.confirm")}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -172,7 +193,7 @@ export function HomeworkDetailPage() {
             <CardContent>
               <div className="prose dark:prose-invert max-w-none">
                 <p className="text-foreground whitespace-pre-wrap">
-                  {homework?.description || "暂无作业描述"}
+                  {homework?.description || t("homeworkPage.noDescription")}
                 </p>
               </div>
 
@@ -181,7 +202,7 @@ export function HomeworkDetailPage() {
                 <div className="mt-6 pt-6 border-t">
                   <h3 className="text-sm font-medium text-foreground mb-3">
                     <FiPaperclip className="inline-block mr-2 h-4 w-4" />
-                    附件
+                    {t("homeworkPage.attachments")}
                   </h3>
                   <div className="space-y-2">
                     {homework.attachments.map((file) => (
@@ -200,7 +221,7 @@ export function HomeworkDetailPage() {
           {!isTeacherView && (
             <Card>
               <CardHeader>
-                <CardTitle>我的提交</CardTitle>
+                <CardTitle>{t("homeworkPage.mySubmission")}</CardTitle>
               </CardHeader>
               <CardContent>
                 {mySubmission ? (
@@ -208,28 +229,31 @@ export function HomeworkDetailPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">
-                          第 {mySubmission.version} 次提交
+                          {t("homeworkPage.submissionVersion", {
+                            version: mySubmission.version,
+                          })}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          提交于{" "}
+                          {t("homeworkPage.submittedAt")}{" "}
                           {new Date(mySubmission.submitted_at).toLocaleString()}
                         </p>
                       </div>
                       <div>
                         {mySubmission.grade ? (
                           <Badge variant="default">
-                            {mySubmission.grade.score} / {homework?.max_score}{" "}
-                            分
+                            {mySubmission.grade.score} / {homework?.max_score}
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">待批改</Badge>
+                          <Badge variant="secondary">
+                            {t("homeworkPage.pendingGrade")}
+                          </Badge>
                         )}
                       </div>
                     </div>
                     {mySubmission.grade?.comment && (
                       <div className="p-3 rounded-lg bg-muted">
                         <p className="text-sm text-muted-foreground">
-                          教师评语
+                          {t("homeworkPage.teacherComment")}
                         </p>
                         <p className="mt-1">{mySubmission.grade.comment}</p>
                       </div>
@@ -239,7 +263,7 @@ export function HomeworkDetailPage() {
                         <Link
                           to={`${prefix}/homework/${homeworkId}/submissions`}
                         >
-                          查看提交历史
+                          {t("homeworkPage.viewHistory")}
                         </Link>
                       </Button>
                       {canSubmit && (
@@ -248,7 +272,7 @@ export function HomeworkDetailPage() {
                             to={`${prefix}/classes/${classId}/homework/${homeworkId}/submit`}
                           >
                             <FiUpload className="mr-2 h-4 w-4" />
-                            重新提交
+                            {t("homeworkPage.resubmit")}
                           </Link>
                         </Button>
                       )}
@@ -257,7 +281,7 @@ export function HomeworkDetailPage() {
                 ) : (
                   <div className="text-center py-6">
                     <p className="text-muted-foreground mb-4">
-                      你还没有提交作业
+                      {t("homeworkPage.notSubmitted")}
                     </p>
                     {canSubmit ? (
                       <Button asChild>
@@ -265,12 +289,12 @@ export function HomeworkDetailPage() {
                           to={`${prefix}/classes/${classId}/homework/${homeworkId}/submit`}
                         >
                           <FiUpload className="mr-2 h-4 w-4" />
-                          提交作业
+                          {t("homeworkPage.submitHomework")}
                         </Link>
                       </Button>
                     ) : (
                       <p className="text-sm text-destructive">
-                        作业已截止，无法提交
+                        {t("homeworkPage.deadlinePassed")}
                       </p>
                     )}
                   </div>
@@ -284,12 +308,14 @@ export function HomeworkDetailPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>作业信息</CardTitle>
+              <CardTitle>{t("homeworkPage.homeworkInfo")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {homework?.creator && (
                 <div>
-                  <p className="text-sm text-muted-foreground">创建者</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("homeworkPage.creator")}
+                  </p>
                   <div className="flex items-center gap-2 mt-1">
                     <Avatar className="h-6 w-6">
                       <AvatarImage
@@ -309,32 +335,41 @@ export function HomeworkDetailPage() {
                 </div>
               )}
               <div>
-                <p className="text-sm text-muted-foreground">截止时间</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("homeworkPage.deadline")}
+                </p>
                 <p className="font-medium">
                   {homework?.deadline
                     ? new Date(homework.deadline).toLocaleString()
-                    : "无截止时间"}
+                    : t("homeworkPage.noDeadline")}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">允许迟交</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("homeworkPage.allowLate")}
+                </p>
                 <p className="font-medium">
-                  {homework?.allow_late ? "是" : "否"}
+                  {homework?.allow_late
+                    ? t("homeworkPage.yes")
+                    : t("homeworkPage.no")}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">附件数量</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("homeworkPage.attachmentCount")}
+                </p>
                 <p className="font-medium">
-                  {homework?.attachments?.length || 0} 个
+                  {homework?.attachments?.length || 0}{" "}
+                  {t("homeworkPage.attachmentUnit")}
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          {isTeacherView && (
+          {canViewSubmissions && (
             <Card>
               <CardHeader>
-                <CardTitle>教师操作</CardTitle>
+                <CardTitle>{t("homeworkPage.submissionManagement")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button variant="outline" className="w-full" asChild>
@@ -342,7 +377,7 @@ export function HomeworkDetailPage() {
                     to={`${prefix}/classes/${classId}/homework/${homeworkId}/submissions`}
                   >
                     <FiBarChart2 className="mr-2 h-4 w-4" />
-                    查看提交
+                    {t("homeworkPage.viewSubmissions")}
                   </Link>
                 </Button>
                 <Button variant="outline" className="w-full" asChild>
@@ -350,7 +385,7 @@ export function HomeworkDetailPage() {
                     to={`${prefix}/classes/${classId}/homework/${homeworkId}/stats`}
                   >
                     <FiBarChart2 className="mr-2 h-4 w-4" />
-                    作业统计
+                    {t("homeworkPage.homeworkStats")}
                   </Link>
                 </Button>
               </CardContent>

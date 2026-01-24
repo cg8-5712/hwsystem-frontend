@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FiAlertCircle,
   FiArrowLeft,
@@ -11,7 +12,6 @@ import {
   Bar,
   BarChart,
   Cell,
-  Legend,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -43,6 +43,7 @@ const SCORE_COLORS = {
 } as const;
 
 export function HomeworkStatsPage() {
+  const { t } = useTranslation();
   const { classId, homeworkId } = useParams<{
     classId: string;
     homeworkId: string;
@@ -64,18 +65,28 @@ export function HomeworkStatsPage() {
   // 提交状态饼图数据
   const submissionPieData = useMemo(() => {
     if (!stats) return [];
-    const submitted = stats.submitted_count || 0;
-    const unsubmitted = (stats.total_students || 0) - submitted;
+    const submitted = Number(stats.submitted_count) || 0;
+    const unsubmitted = (Number(stats.total_students) || 0) - submitted;
     return [
-      { name: "已提交", value: submitted, color: "#22c55e" },
-      { name: "未提交", value: unsubmitted, color: "#ef4444" },
+      {
+        name: t("homeworkStats.pieChart.submitted"),
+        value: submitted,
+        color: "#22c55e",
+      },
+      {
+        name: t("homeworkStats.pieChart.unsubmitted"),
+        value: unsubmitted,
+        color: "#ef4444",
+      },
     ].filter((item) => item.value > 0);
-  }, [stats]);
+  }, [stats, t]);
 
   if (error) {
     return (
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center text-destructive">加载失败，请刷新重试</div>
+        <div className="text-center text-destructive">
+          {t("common.loadError")}
+        </div>
       </div>
     );
   }
@@ -100,12 +111,14 @@ export function HomeworkStatsPage() {
       <Button variant="ghost" asChild className="mb-4">
         <Link to={`${prefix}/classes/${classId}/homework/${homeworkId}`}>
           <FiArrowLeft className="mr-2 h-4 w-4" />
-          返回作业详情
+          {t("homeworkStats.backToDetail")}
         </Link>
       </Button>
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">作业统计</h1>
+        <h1 className="text-2xl font-bold text-foreground">
+          {t("homeworkStats.title")}
+        </h1>
         <p className="mt-1 text-muted-foreground">{homework?.title}</p>
       </div>
 
@@ -118,7 +131,9 @@ export function HomeworkStatsPage() {
                 <FiUsers className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">总学生数</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("homeworkStats.stats.totalStudents")}
+                </p>
                 <p className="text-2xl font-bold">
                   {stats?.total_students || 0}
                 </p>
@@ -134,7 +149,9 @@ export function HomeworkStatsPage() {
                 <FiCheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">已提交</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("homeworkStats.stats.submitted")}
+                </p>
                 <p className="text-2xl font-bold">
                   {stats?.submitted_count || 0}
                 </p>
@@ -150,7 +167,9 @@ export function HomeworkStatsPage() {
                 <FiCheckCircle className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">已批改</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("homeworkStats.stats.graded")}
+                </p>
                 <p className="text-2xl font-bold">{stats?.graded_count || 0}</p>
               </div>
             </div>
@@ -164,7 +183,9 @@ export function HomeworkStatsPage() {
                 <FiClock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">迟交</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("homeworkStats.stats.late")}
+                </p>
                 <p className="text-2xl font-bold">{stats?.late_count || 0}</p>
               </div>
             </div>
@@ -176,10 +197,12 @@ export function HomeworkStatsPage() {
         {/* 提交率饼图 */}
         <Card>
           <CardHeader>
-            <CardTitle>提交率</CardTitle>
+            <CardTitle>{t("homeworkStats.submissionRate.title")}</CardTitle>
             <CardDescription>
-              {stats?.submitted_count || 0} / {stats?.total_students || 0}{" "}
-              人已提交
+              {t("homeworkStats.submissionRate.description", {
+                submitted: stats?.submitted_count || 0,
+                total: stats?.total_students || 0,
+              })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -195,7 +218,7 @@ export function HomeworkStatsPage() {
                     paddingAngle={2}
                     dataKey="value"
                     label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
+                      `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
                     }
                   >
                     {submissionPieData.map((entry, index) => (
@@ -219,25 +242,33 @@ export function HomeworkStatsPage() {
         {/* 成绩统计 */}
         <Card>
           <CardHeader>
-            <CardTitle>成绩统计</CardTitle>
-            <CardDescription>基于已批改的作业</CardDescription>
+            <CardTitle>{t("homeworkStats.scoreStats.title")}</CardTitle>
+            <CardDescription>
+              {t("homeworkStats.scoreStats.description")}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-sm text-muted-foreground">平均分</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("homeworkStats.scoreStats.average")}
+                </p>
                 <p className="text-xl font-bold">
                   {stats?.score_stats?.average?.toFixed(1) || "-"}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">最高分</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("homeworkStats.scoreStats.max")}
+                </p>
                 <p className="text-xl font-bold text-green-600">
                   {stats?.score_stats?.max || "-"}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">最低分</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("homeworkStats.scoreStats.min")}
+                </p>
                 <p className="text-xl font-bold text-red-600">
                   {stats?.score_stats?.min || "-"}
                 </p>
@@ -249,9 +280,11 @@ export function HomeworkStatsPage() {
         {/* 分数分布柱状图 */}
         <Card>
           <CardHeader>
-            <CardTitle>分数分布</CardTitle>
+            <CardTitle>{t("homeworkStats.scoreDistribution.title")}</CardTitle>
             <CardDescription>
-              基于已批改的 {stats?.graded_count || 0} 份作业
+              {t("homeworkStats.scoreDistribution.description", {
+                count: Number(stats?.graded_count) || 0,
+              })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -274,8 +307,13 @@ export function HomeworkStatsPage() {
                     allowDecimals={false}
                   />
                   <Tooltip
-                    formatter={(value: number) => [`${value} 人`, "人数"]}
-                    labelFormatter={(label) => `分数段: ${label}`}
+                    formatter={(value) => [
+                      `${value ?? 0}`,
+                      t("homeworkStats.scoreDistribution.count"),
+                    ]}
+                    labelFormatter={(label) =>
+                      `${t("homeworkStats.scoreDistribution.range")}: ${label}`
+                    }
                   />
                   <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                     {chartData.map((entry, index) => (
@@ -285,7 +323,9 @@ export function HomeworkStatsPage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-center text-muted-foreground py-4">暂无数据</p>
+              <p className="text-center text-muted-foreground py-4">
+                {t("homeworkStats.scoreDistribution.noData")}
+              </p>
             )}
           </CardContent>
         </Card>
@@ -295,10 +335,12 @@ export function HomeworkStatsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FiAlertCircle className="h-5 w-5 text-destructive" />
-              未提交名单
+              {t("homeworkStats.unsubmitted.title")}
             </CardTitle>
             <CardDescription>
-              {stats?.unsubmitted_students?.length || 0} 人未提交
+              {t("homeworkStats.unsubmitted.description", {
+                count: stats?.unsubmitted_students?.length || 0,
+              })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -318,13 +360,15 @@ export function HomeworkStatsPage() {
                         @{student.username}
                       </p>
                     </div>
-                    <Badge variant="destructive">未提交</Badge>
+                    <Badge variant="destructive">
+                      {t("homeworkStats.unsubmitted.badge")}
+                    </Badge>
                   </div>
                 ))}
               </div>
             ) : (
               <p className="text-center text-muted-foreground py-4">
-                所有学生都已提交
+                {t("homeworkStats.unsubmitted.allSubmitted")}
               </p>
             )}
           </CardContent>

@@ -1,7 +1,7 @@
 "use client";
 
 import { XIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -149,8 +149,6 @@ export function BatchActionBar({
 export function useBatchSelection<T extends { id: string | number }>(
   items: T[],
 ) {
-  const { useState, useCallback, useMemo } = require("react");
-
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
     new Set(),
   );

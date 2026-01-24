@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import i18n from "@/app/i18n";
 import { authService } from "@/features/auth/services/auth";
 import type { LoginRequest, User } from "@/types/generated";
 import { useNotificationStore } from "./useNotificationStore";
@@ -47,7 +48,10 @@ export const useUserStore = create<UserState>()(
           const userName = response.user.display_name || response.user.username;
           useNotificationStore
             .getState()
-            .success("登录成功", `欢迎回来，${userName}！`);
+            .success(
+              i18n.t("auth.login.success.title"),
+              i18n.t("auth.login.success.message", { name: userName }),
+            );
 
           return response.user;
         } finally {
@@ -59,7 +63,7 @@ export const useUserStore = create<UserState>()(
         const userName =
           get().currentUser?.display_name ||
           get().currentUser?.username ||
-          "用户";
+          i18n.t("role.user");
 
         // 清除状态和存储
         get().clearAuthData();
@@ -67,7 +71,10 @@ export const useUserStore = create<UserState>()(
         // 显示通知
         useNotificationStore
           .getState()
-          .info("已安全退出", `再见，${userName}！`);
+          .info(
+            i18n.t("auth.logout.success.title"),
+            i18n.t("auth.logout.success.message", { name: userName }),
+          );
       },
 
       initAuth: async () => {
@@ -111,7 +118,7 @@ export const useUserStore = create<UserState>()(
           return user;
         } catch {
           get().logout();
-          throw new Error("刷新用户信息失败");
+          throw new Error(i18n.t("error.refreshUserInfoFailed"));
         }
       },
 
@@ -156,11 +163,11 @@ export const useRoleText = () => {
   const role = useUserStore((s) => s.currentUser?.role);
   switch (role) {
     case "admin":
-      return "管理员";
+      return i18n.t("role.admin");
     case "teacher":
-      return "教师";
+      return i18n.t("role.teacher");
     case "user":
-      return "用户";
+      return i18n.t("role.user");
     default:
       return "";
   }
@@ -170,13 +177,13 @@ export const useUserAvatar = () => {
   const role = useUserStore((s) => s.currentUser?.role);
   switch (role) {
     case "admin":
-      return "管";
+      return i18n.t("avatar.admin");
     case "teacher":
-      return "师";
+      return i18n.t("avatar.teacher");
     case "user":
-      return "用";
+      return i18n.t("avatar.user");
     default:
-      return "用";
+      return i18n.t("avatar.user");
   }
 };
 

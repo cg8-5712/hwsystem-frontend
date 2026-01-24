@@ -49,7 +49,7 @@ export function Pagination({
   pageSizeOptions = [10, 20, 50, 100],
   onChange,
   showSizeChanger = true,
-  showQuickJumper = false,
+  showQuickJumper: _showQuickJumper = false,
   showTotal = true,
   className,
   disabled = false,
@@ -212,7 +212,7 @@ export function Pagination({
 
         {/* 页码按钮（桌面端显示） */}
         <div className="hidden sm:flex items-center gap-1">
-          {pageNumbers.map((page, index) => {
+          {pageNumbers.map((page) => {
             if (page === "ellipsis-start" || page === "ellipsis-end") {
               return (
                 <span

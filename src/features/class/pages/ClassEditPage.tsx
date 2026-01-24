@@ -29,15 +29,20 @@ import { notify } from "@/stores/useNotificationStore";
 import { useClass, useUpdateClass } from "../hooks/useClass";
 import { useRoutePrefix } from "../hooks/useClassBasePath";
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(1, "请输入班级名称")
-    .max(100, "班级名称不能超过100个字符"),
-  description: z.string().max(500, "班级描述不能超过500个字符").optional(),
-});
+function createFormSchema(t: (key: string) => string) {
+  return z.object({
+    name: z
+      .string()
+      .min(1, t("classEditPage.validation.nameRequired"))
+      .max(100, t("classEditPage.validation.nameMaxLength")),
+    description: z
+      .string()
+      .max(500, t("classEditPage.validation.descriptionMaxLength"))
+      .optional(),
+  });
+}
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<ReturnType<typeof createFormSchema>>;
 
 export function ClassEditPage() {
   const { t } = useTranslation();
@@ -46,6 +51,8 @@ export function ClassEditPage() {
   const prefix = useRoutePrefix();
   const { data: classData, isLoading, error } = useClass(classId!);
   const updateClass = useUpdateClass(classId!);
+
+  const formSchema = createFormSchema(t);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -80,7 +87,9 @@ export function ClassEditPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center text-destructive">加载失败，请刷新重试</div>
+        <div className="text-center text-destructive">
+          {t("common.loadError")}
+        </div>
       </div>
     );
   }
@@ -108,14 +117,14 @@ export function ClassEditPage() {
       <Button variant="ghost" asChild className="mb-4">
         <Link to={`${prefix}/classes/${classId}`}>
           <FiArrowLeft className="mr-2 h-4 w-4" />
-          返回班级详情
+          {t("classEditPage.backToDetail")}
         </Link>
       </Button>
 
       <Card>
         <CardHeader>
-          <CardTitle>编辑班级</CardTitle>
-          <CardDescription>修改班级名称和描述信息</CardDescription>
+          <CardTitle>{t("classEditPage.title")}</CardTitle>
+          <CardDescription>{t("classEditPage.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -125,15 +134,15 @@ export function ClassEditPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>班级名称</FormLabel>
+                    <FormLabel>{t("classEditPage.fields.name")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="例如：数据结构 2026春季班"
+                        placeholder={t("classEditPage.fields.namePlaceholder")}
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      为班级起一个简洁明了的名称
+                      {t("classEditPage.fields.nameDescription")}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -145,10 +154,14 @@ export function ClassEditPage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>班级描述（可选）</FormLabel>
+                    <FormLabel>
+                      {t("classEditPage.fields.descriptionLabel")}
+                    </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="添加班级描述，如课程内容、上课时间等"
+                        placeholder={t(
+                          "classEditPage.fields.descriptionPlaceholder",
+                        )}
                         rows={4}
                         {...field}
                       />
@@ -164,10 +177,12 @@ export function ClassEditPage() {
                   variant="outline"
                   onClick={() => navigate(`${prefix}/classes/${classId}`)}
                 >
-                  取消
+                  {t("classEditPage.cancel")}
                 </Button>
                 <Button type="submit" disabled={updateClass.isPending}>
-                  {updateClass.isPending ? "保存中..." : "保存修改"}
+                  {updateClass.isPending
+                    ? t("classEditPage.saving")
+                    : t("classEditPage.save")}
                 </Button>
               </div>
             </form>

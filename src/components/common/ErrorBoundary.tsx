@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
+import i18n from "@/app/i18n";
 
 interface Props {
   children: ReactNode;
@@ -68,10 +69,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <div className="space-y-2">
               <h1 className="text-2xl font-semibold text-foreground">
-                页面出错了
+                {i18n.t("errorPage.title")}
               </h1>
               <p className="text-muted-foreground">
-                抱歉，页面遇到了一些问题。请尝试刷新页面或返回首页。
+                {i18n.t("errorPage.description")}
               </p>
             </div>
 
@@ -95,7 +96,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 onClick={this.handleReset}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
               >
-                重试
+                {i18n.t("errorPage.retry")}
               </button>
               <button
                 type="button"
@@ -103,7 +104,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 <FiRefreshCw className="w-4 h-4" />
-                刷新页面
+                {i18n.t("errorPage.refresh")}
               </button>
             </div>
 
@@ -111,7 +112,7 @@ export class ErrorBoundary extends Component<Props, State> {
               href="/"
               className="text-sm text-muted-foreground hover:text-foreground underline"
             >
-              返回首页
+              {i18n.t("errorPage.backHome")}
             </a>
           </div>
         </div>

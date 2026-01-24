@@ -12,6 +12,7 @@ import {
   useFormContext,
   useFormState,
 } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
@@ -137,7 +138,16 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
 
 function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message ?? "") : props.children;
+  const { t } = useTranslation();
+
+  // 如果有错误消息，尝试翻译它（支持 i18n key 作为 zod 错误消息）
+  let body: React.ReactNode = props.children;
+  if (error?.message) {
+    const message = String(error.message);
+    // 尝试翻译，如果翻译结果和原文相同（说明没有对应翻译），则使用原文
+    const translated = t(message);
+    body = translated !== message ? translated : message;
+  }
 
   if (!body) {
     return null;
