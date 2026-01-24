@@ -65,6 +65,8 @@ export function useHomeworkStats(homeworkId: string) {
     queryKey: homeworkKeys.stats(homeworkId),
     queryFn: () => homeworkService.getStats(homeworkId),
     enabled: !!homeworkId,
+    staleTime: 30 * 1000, // 30秒过期
+    refetchOnMount: "always", // 总是在挂载时重新获取
   });
 }
 

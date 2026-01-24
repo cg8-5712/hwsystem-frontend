@@ -20,12 +20,17 @@ export type Submission = { id: bigint, homework_id: bigint, creator_id: bigint, 
 /**
  * 提交者信息
  */
-export type SubmissionCreator = { id: bigint, username: string, display_name: string | null, };
+export type SubmissionCreator = { id: bigint, username: string, display_name: string | null, avatar_url: string | null, };
 
 /**
  * 提交中的评分信息
  */
 export type SubmissionGradeInfo = { score: number, comment: string | null, graded_at: string, };
+
+/**
+ * 提交关联的作业信息
+ */
+export type SubmissionHomeworkInfo = { id: bigint, title: string, max_score: number, deadline: string | null, };
 
 /**
  * 提交列表项（包含提交者信息）
@@ -45,7 +50,7 @@ export type SubmissionListResponse = { items: Array<SubmissionListItem>, paginat
 /**
  * 提交响应
  */
-export type SubmissionResponse = { id: bigint, homework_id: bigint, creator: SubmissionCreator, content: string, attachments: Array<FileInfo>, status: string, submitted_at: string, grade: SubmissionGradeInfo | null, };
+export type SubmissionResponse = { id: bigint, homework_id: bigint, creator: SubmissionCreator, content: string, attachments: Array<FileInfo>, status: string, submitted_at: string, grade: SubmissionGradeInfo | null, version: number, is_late: boolean, homework: SubmissionHomeworkInfo | null, };
 
 /**
  * 提交状态

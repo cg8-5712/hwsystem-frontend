@@ -7,6 +7,7 @@ import {
   FiChevronRight,
   FiClock,
   FiEdit,
+  FiEdit3,
   FiFileText,
   FiList,
   FiMoreVertical,
@@ -168,11 +169,16 @@ export function TeacherHomeworksPage() {
               {String(stats.total_students)}
             </Badge>
           )}
-          {/* 待批改 */}
+          {/* 待批改 + 快速批改按钮 */}
           {pendingGrade > 0 && (
-            <Badge variant="secondary" className="font-medium text-orange-600">
-              {t("teacherHomeworks.pendingGrade")} {pendingGrade}
-            </Badge>
+            <Link
+              to={`${prefix}/classes/${hw.class_id}/homework/${hw.id}/submissions`}
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:hover:bg-orange-900/50 transition-colors cursor-pointer"
+            >
+              <FiEdit3 className="h-3.5 w-3.5" />
+              {t("teacherHomeworks.grade")} ({pendingGrade})
+            </Link>
           )}
           {/* 截止日期 */}
           <span
@@ -198,6 +204,14 @@ export function TeacherHomeworksPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link
+                  to={`${prefix}/classes/${hw.class_id}/homework/${hw.id}/submissions`}
+                >
+                  <FiList className="mr-2 h-4 w-4" />
+                  {t("teacherHomeworks.actions.submissions")}
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link
                   to={`${prefix}/classes/${hw.class_id}/homework/${hw.id}/edit`}

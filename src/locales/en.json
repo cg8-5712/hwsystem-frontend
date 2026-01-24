@@ -22,7 +22,93 @@
     "unknownError": "An unknown error occurred, please try again",
     "operationFailed": "Operation failed",
     "retry": "Retry",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "copySuccess": "Copied to clipboard",
+    "copyFailed": "Copy failed"
+  },
+  "notify": {
+    "file": {
+      "uploadSuccess": "File uploaded successfully",
+      "uploadFailed": "File upload failed"
+    },
+    "submission": {
+      "success": "Homework submitted successfully",
+      "failed": "Submission failed",
+      "contentRequired": "Please fill in the content or upload an attachment"
+    },
+    "settings": {
+      "noChanges": "No changes to save",
+      "updated": "Profile updated",
+      "updateFailed": "Update failed"
+    },
+    "class": {
+      "createSuccess": "Class created successfully",
+      "createFailed": "Failed to create",
+      "updateSuccess": "Class updated successfully",
+      "updateFailed": "Update failed",
+      "deleteSuccess": "Class deleted",
+      "deleteFailed": "Delete failed",
+      "joinSuccess": "Joined class successfully",
+      "joinFailed": "Failed to join",
+      "inviteCodeRequired": "Please enter invite code",
+      "inviteCodeInvalid": "Invalid invite code or already joined",
+      "inviteCodeCopied": "Invite code copied"
+    },
+    "member": {
+      "roleUpdated": "Role updated",
+      "removed": "Member removed",
+      "operationFailed": "Operation failed"
+    },
+    "homework": {
+      "createSuccess": "Homework created successfully",
+      "createFailed": "Failed to create",
+      "updateSuccess": "Homework updated",
+      "updateFailed": "Update failed",
+      "deleteSuccess": "Homework deleted",
+      "deleteFailed": "Delete failed"
+    },
+    "notification": {
+      "markedAllRead": "All marked as read",
+      "deleteSuccess": "Notification deleted",
+      "deleteFailed": "Delete failed",
+      "operationFailed": "Operation failed"
+    },
+    "user": {
+      "batchDeleteSuccess": "Successfully deleted {{count}} users",
+      "batchDeleteFailed": "Batch delete failed",
+      "exportSuccess": "Exported {{count}} users"
+    },
+    "auth": {
+      "loginRequired": "Please login first"
+    },
+    "tryAgainLater": "Please try again later"
+  },
+  "date": {
+    "expired": "Expired",
+    "dueInMinutes": "Due in {{mins}} minutes",
+    "dueInHours": "Due in {{hours}} hours",
+    "dueInDays": "Due in {{days}} days",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "daysAgo": "{{days}} days ago",
+    "daysLater": "in {{days}} days"
+  },
+  "batch": {
+    "deselectAll": "Deselect All",
+    "selectAll": "Select All",
+    "clear": "Cancel",
+    "selected": "{{count}} / {{total}} selected"
+  },
+  "pagination": {
+    "total": "Total {{count}}",
+    "perPage": "Per page",
+    "items": "items",
+    "firstPage": "First",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "lastPage": "Last",
+    "goToPage": "Page {{page}}"
   },
   "sidebar": {
     "navigation": "Navigation",
@@ -112,7 +198,7 @@
     }
   },
   "footer": {
-    "copyright": "© 2022-{year} Homework Management System. All rights reserved.",
+    "copyright": "© 2022-{{year}} Homework Management System. All rights reserved.",
     "about": "About Us",
     "contact": "Contact Us",
     "privacy": "Privacy Policy",
@@ -139,7 +225,7 @@
       },
       "success": {
         "title": "Login Successful",
-        "message": "Welcome back, {name}! Redirecting to dashboard..."
+        "message": "Welcome back, {{name}}! Redirecting to dashboard..."
       }
     },
     "forgotPassword": {
@@ -242,7 +328,7 @@
       "subtitle": "Tailored for Each Role",
       "description": "Different roles have different functional permissions, ensuring system security and usability",
       "dashboard": "Go to Dashboard",
-      "loginAs": "Login as {role}",
+      "loginAs": "Login as {{role}}",
       "items": {
         "student": {
           "name": "Student",
@@ -291,7 +377,7 @@
   },
   "about": {
     "title": "About Homework Management System",
-    "subtitle": "Modern educational homework management platform built with Vue 3 + TypeScript",
+    "subtitle": "Modern educational homework management platform built with React 19 + TypeScript",
     "features": {
       "title": "Product Features",
       "subtitle": "Crafted for Educational Scenarios",
@@ -307,7 +393,7 @@
         },
         "modernTech": {
           "title": "Modern Technology Stack",
-          "description": "Vue 3 + Composition API + TypeScript, type safety and development experience"
+          "description": "React 19 + Hooks + TypeScript, type safety and development experience"
         },
         "darkMode": {
           "title": "Dark Mode",
@@ -329,11 +415,11 @@
       "description": "Adopting industry best practices to ensure project maintainability and scalability",
       "frontend": {
         "title": "Frontend Tech Stack",
-        "vue": "Progressive JavaScript Framework",
+        "react": "JavaScript Library for Building User Interfaces",
         "typescript": "Type-safe JavaScript Superset",
         "vite": "Next Generation Frontend Build Tool",
         "tailwind": "Utility-first CSS Framework",
-        "pinia": "Vue.js State Management Library"
+        "zustand": "Lightweight React State Management Library"
       },
       "backend": {
         "title": "Backend Tech Stack",
@@ -387,8 +473,8 @@
       "title": "Contact Information",
       "email": {
         "title": "Email Address",
-        "support": "support{'@'}hwsystem.com",
-        "admin": "admin{'@'}hwsystem.com"
+        "support": "support@hwsystem.com",
+        "admin": "admin@hwsystem.com"
       },
       "phone": {
         "title": "Phone Number",

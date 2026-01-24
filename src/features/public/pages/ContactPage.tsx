@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { fadeInUp, staggerContainer } from "@/lib/motion";
 
+const colorClasses = {
+  blue: "from-blue-500 to-blue-600",
+  green: "from-green-500 to-green-600",
+  purple: "from-purple-500 to-purple-600",
+  orange: "from-orange-500 to-orange-600",
+} as const;
+
 const contactInfo = [
   { key: "email", icon: FiMail, color: "blue" },
   { key: "phone", icon: FiPhone, color: "green" },
@@ -55,7 +62,7 @@ export function ContactPage() {
                   <CardHeader className="pb-2">
                     <div className="flex items-start gap-4">
                       <motion.div
-                        className={`h-12 w-12 rounded-xl bg-gradient-to-br from-${info.color}-500 to-${info.color}-600 flex items-center justify-center shadow-md`}
+                        className={`h-12 w-12 rounded-xl bg-gradient-to-br ${colorClasses[info.color]} flex items-center justify-center shadow-md`}
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         transition={{ type: "spring", stiffness: 200 }}
                       >

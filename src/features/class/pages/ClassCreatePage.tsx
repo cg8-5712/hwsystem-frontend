@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { FiArrowLeft } from "react-icons/fi";
 import { Link, useNavigate } from "react-router";
 import { z } from "zod";
@@ -38,6 +39,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function ClassCreatePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const prefix = useRoutePrefix();
   const createClass = useCreateClass();
@@ -53,7 +55,7 @@ export function ClassCreatePage() {
 
   const onSubmit = async (values: FormValues) => {
     if (!currentUser) {
-      notify.error("请先登录");
+      notify.error(t("notify.auth.loginRequired"));
       return;
     }
 
@@ -62,10 +64,13 @@ export function ClassCreatePage() {
         name: values.name,
         description: values.description || null,
       });
-      notify.success("班级创建成功", `邀请码: ${newClass.invite_code}`);
+      notify.success(
+        t("notify.class.createSuccess"),
+        `邀请码: ${newClass.invite_code}`,
+      );
       navigate(`${prefix}/classes/${newClass.id}`);
     } catch {
-      notify.error("创建失败", "请稍后重试");
+      notify.error(t("notify.class.createFailed"), t("notify.tryAgainLater"));
     }
   };
 

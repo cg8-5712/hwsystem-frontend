@@ -1,6 +1,17 @@
-import { useEffect, useState } from "react";
-import { FiEdit2, FiEye, FiPlus, FiSearch, FiTrash2 } from "react-icons/fi";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  FiDownload,
+  FiEdit2,
+  FiEye,
+  FiPlus,
+  FiSearch,
+  FiTrash2,
+  FiUserMinus,
+} from "react-icons/fi";
 import { Link } from "react-router";
+import { BatchActionBar } from "@/components/common/BatchActionBar";
+import { Pagination } from "@/components/common/Pagination";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +25,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -31,6 +43,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { notify } from "@/stores/useNotificationStore";
 import { type UserDetail, useDeleteUser, useUserList } from "../hooks/useUsers";
 import type { UserRole, UserStatus } from "../services/userService";
 
@@ -61,12 +74,17 @@ const statusColors: Record<UserStatus, string> = {
 };
 
 export default function UserListPage() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<UserRole | "all">("all");
   const [statusFilter, setStatusFilter] = useState<UserStatus | "all">("all");
   const [deleteTarget, setDeleteTarget] = useState<UserDetail | null>(null);
+
+  // 批量选择状态
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -78,7 +96,7 @@ export default function UserListPage() {
 
   const { data, isLoading, error } = useUserList({
     page,
-    page_size: 20,
+    page_size: pageSize,
     search: debouncedSearch || undefined,
     role: roleFilter === "all" ? undefined : roleFilter,
     status: statusFilter === "all" ? undefined : statusFilter,
@@ -86,10 +104,102 @@ export default function UserListPage() {
 
   const deleteUser = useDeleteUser();
 
+  // 批量选择相关函数
+  const items = data?.items ?? [];
+
+  const isSelected = useCallback(
+    (id: string) => selectedIds.has(id),
+    [selectedIds],
+  );
+
+  const toggleSelection = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const selectAll = useCallback(() => {
+    setSelectedIds(new Set(items.map((item) => item.id)));
+  }, [items]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const isAllSelected = useMemo(
+    () => items.length > 0 && selectedIds.size === items.length,
+    [items.length, selectedIds.size],
+  );
+
+  // 批量删除
+  const handleBatchDelete = async () => {
+    if (selectedIds.size === 0) return;
+    // 显示确认对话框后批量删除
+    const count = selectedIds.size;
+    try {
+      for (const id of selectedIds) {
+        await deleteUser.mutateAsync(id);
+      }
+      notify.success(t("notify.user.batchDeleteSuccess", { count }));
+      clearSelection();
+    } catch {
+      notify.error(t("notify.user.batchDeleteFailed"));
+    }
+  };
+
+  // 导出 CSV
+  const handleExportCSV = () => {
+    const exportItems =
+      selectedIds.size > 0
+        ? items.filter((item) => selectedIds.has(item.id))
+        : items;
+
+    const headers = ["用户名", "邮箱", "显示名", "角色", "状态", "创建时间"];
+    const rows = exportItems.map((user) => [
+      user.username,
+      user.email,
+      user.display_name || "",
+      roleLabels[user.role],
+      statusLabels[user.status],
+      new Date(user.created_at).toLocaleDateString("zh-CN"),
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `users_${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    notify.success(
+      t("notify.user.exportSuccess", { count: exportItems.length }),
+    );
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     await deleteUser.mutateAsync(deleteTarget.id);
     setDeleteTarget(null);
+  };
+
+  // 分页变化
+  const handlePageChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
+    clearSelection(); // 切换页面时清空选择
   };
 
   if (error) {
@@ -176,12 +286,47 @@ export default function UserListPage() {
         </CardContent>
       </Card>
 
+      {/* 批量操作栏 */}
+      <BatchActionBar
+        selectedCount={selectedIds.size}
+        totalCount={items.length}
+        onSelectAll={selectAll}
+        onClearSelection={clearSelection}
+        isAllSelected={isAllSelected}
+        actions={[
+          {
+            label: "导出 CSV",
+            icon: <FiDownload className="h-4 w-4" />,
+            onClick: handleExportCSV,
+          },
+          {
+            label: "批量删除",
+            icon: <FiUserMinus className="h-4 w-4" />,
+            onClick: handleBatchDelete,
+            variant: "destructive",
+          },
+        ]}
+      />
+
       {/* 用户表格 */}
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={isAllSelected}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        selectAll();
+                      } else {
+                        clearSelection();
+                      }
+                    }}
+                    aria-label="全选"
+                  />
+                </TableHead>
                 <TableHead>用户名</TableHead>
                 <TableHead>邮箱</TableHead>
                 <TableHead>显示名</TableHead>
@@ -195,6 +340,9 @@ export default function UserListPage() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
+                    <TableCell>
+                      <Skeleton className="h-4 w-4" />
+                    </TableCell>
                     <TableCell>
                       <Skeleton className="h-4 w-24" />
                     </TableCell>
@@ -218,18 +366,28 @@ export default function UserListPage() {
                     </TableCell>
                   </TableRow>
                 ))
-              ) : data?.items.length === 0 ? (
+              ) : items.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={8}
                     className="text-center py-8 text-muted-foreground"
                   >
                     暂无用户数据
                   </TableCell>
                 </TableRow>
               ) : (
-                data?.items.map((user) => (
-                  <TableRow key={user.id}>
+                items.map((user) => (
+                  <TableRow
+                    key={user.id}
+                    className={isSelected(user.id) ? "bg-muted/50" : ""}
+                  >
+                    <TableCell>
+                      <Checkbox
+                        checked={isSelected(user.id)}
+                        onCheckedChange={() => toggleSelection(user.id)}
+                        aria-label={`选择 ${user.username}`}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">
                       {user.username}
                     </TableCell>
@@ -284,35 +442,16 @@ export default function UserListPage() {
       </Card>
 
       {/* 分页 */}
-      {data && Number(data.pagination.total_pages) > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            共 {data.pagination.total} 条记录，第 {page} /{" "}
-            {data.pagination.total_pages} 页
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              上一页
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setPage((p) =>
-                  Math.min(Number(data.pagination.total_pages), p + 1),
-                )
-              }
-              disabled={page >= Number(data.pagination.total_pages)}
-            >
-              下一页
-            </Button>
-          </div>
-        </div>
+      {data && (
+        <Pagination
+          current={page}
+          total={Number(data.pagination.total)}
+          pageSize={pageSize}
+          pageSizeOptions={[10, 20, 50, 100]}
+          onChange={handlePageChange}
+          showTotal
+          showSizeChanger
+        />
       )}
 
       {/* 删除确认对话框 */}

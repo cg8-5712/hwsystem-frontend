@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { FiArrowLeft } from "react-icons/fi";
 import { Link, useNavigate, useParams } from "react-router";
 import { z } from "zod";
@@ -39,6 +40,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function ClassEditPage() {
+  const { t } = useTranslation();
   const { classId } = useParams<{ classId: string }>();
   const navigate = useNavigate();
   const prefix = useRoutePrefix();
@@ -68,10 +70,10 @@ export function ClassEditPage() {
         name: values.name,
         description: values.description || null,
       });
-      notify.success("班级信息已更新");
+      notify.success(t("notify.class.updateSuccess"));
       navigate(`${prefix}/classes/${classId}`);
     } catch {
-      notify.error("更新失败", "请稍后重试");
+      notify.error(t("notify.class.updateFailed"), t("notify.tryAgainLater"));
     }
   };
 

@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import {
   FiAlertTriangle,
   FiArrowLeft,
@@ -52,6 +53,7 @@ interface UploadedFile {
 }
 
 export function SubmitHomeworkPage() {
+  const { t } = useTranslation();
   const { classId, homeworkId } = useParams<{
     classId: string;
     homeworkId: string;
@@ -69,7 +71,7 @@ export function SubmitHomeworkPage() {
   const isDeadlinePassed = homework?.deadline
     ? new Date(homework.deadline) < new Date()
     : false;
-  const isLateSubmission = isDeadlinePassed && homework?.allow_late_submission;
+  const isLateSubmission = isDeadlinePassed && homework?.allow_late;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -95,9 +97,9 @@ export function SubmitHomeworkPage() {
           },
         ]);
       }
-      notify.success("文件上传成功");
+      notify.success(t("notify.file.uploadSuccess"));
     } catch {
-      notify.error("文件上传失败");
+      notify.error(t("notify.file.uploadFailed"));
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -110,7 +112,7 @@ export function SubmitHomeworkPage() {
 
   const onSubmit = async (values: FormValues) => {
     if (!values.content && uploadedFiles.length === 0) {
-      notify.warning("请填写作业内容或上传附件");
+      notify.warning(t("notify.submission.contentRequired"));
       return;
     }
 
@@ -122,10 +124,10 @@ export function SubmitHomeworkPage() {
             ? uploadedFiles.map((f) => f.download_token)
             : null,
       });
-      notify.success("作业提交成功");
+      notify.success(t("notify.submission.success"));
       navigate(`${prefix}/classes/${classId}/homework/${homeworkId}`);
     } catch {
-      notify.error("提交失败", "请稍后重试");
+      notify.error(t("notify.submission.failed"), t("notify.tryAgainLater"));
     }
   };
 
@@ -138,7 +140,7 @@ export function SubmitHomeworkPage() {
     );
   }
 
-  if (isDeadlinePassed && !homework?.allow_late_submission) {
+  if (isDeadlinePassed && !homework?.allow_late) {
     return (
       <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-8">
         <Button variant="ghost" asChild className="mb-4">

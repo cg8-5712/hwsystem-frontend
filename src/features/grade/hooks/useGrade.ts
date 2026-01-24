@@ -22,7 +22,7 @@ export function useGrade(submissionId: string) {
           error &&
           typeof error === "object" &&
           "code" in error &&
-          error.code === 404
+          (error.code === 404 || Number(error.code) === 404)
         ) {
           return undefined;
         }

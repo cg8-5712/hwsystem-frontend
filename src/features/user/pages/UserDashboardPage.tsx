@@ -74,13 +74,13 @@ export function UserDashboardPage() {
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
 
     if (days < 0) {
-      return `${t("dashboard.user.deadline")}: ${Math.abs(days)} 天前`;
+      return `${t("dashboard.user.deadline")}: ${t("date.daysAgo", { days: Math.abs(days) })}`;
     } else if (days === 0) {
-      return `${t("dashboard.user.deadline")}: 今天`;
+      return `${t("dashboard.user.deadline")}: ${t("date.today")}`;
     } else if (days === 1) {
-      return `${t("dashboard.user.deadline")}: 明天`;
+      return `${t("dashboard.user.deadline")}: ${t("date.tomorrow")}`;
     } else if (days <= 7) {
-      return `${t("dashboard.user.deadline")}: ${days} 天后`;
+      return `${t("dashboard.user.deadline")}: ${t("date.daysLater", { days })}`;
     } else {
       return `${t("dashboard.user.deadline")}: ${date.toLocaleDateString()}`;
     }

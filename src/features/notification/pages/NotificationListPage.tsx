@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FiBell,
   FiBook,
@@ -53,6 +54,7 @@ const notificationTypeLabels: Record<NotificationType, string> = {
 };
 
 export function NotificationListPage() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<string>("all");
   const currentUser = useCurrentUser();
   const { data, isLoading, error } = useNotificationList({
@@ -76,16 +78,16 @@ export function NotificationListPage() {
     try {
       await markAsRead.mutateAsync(id);
     } catch {
-      notify.error("操作失败");
+      notify.error(t("notify.notification.operationFailed"));
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
       await markAllAsRead.mutateAsync();
-      notify.success("已全部标记为已读");
+      notify.success(t("notify.notification.markedAllRead"));
     } catch {
-      notify.error("操作失败");
+      notify.error(t("notify.notification.operationFailed"));
     }
   };
 
@@ -94,9 +96,9 @@ export function NotificationListPage() {
     e.stopPropagation();
     try {
       await deleteNotification.mutateAsync(id);
-      notify.success("通知已删除");
+      notify.success(t("notify.notification.deleteSuccess"));
     } catch {
-      notify.error("删除失败");
+      notify.error(t("notify.notification.deleteFailed"));
     }
   };
 

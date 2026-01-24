@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FiBook,
   FiCalendar,
@@ -33,6 +34,7 @@ import { useClassList, useJoinClass } from "../hooks/useClass";
 import { useRoutePrefix } from "../hooks/useClassBasePath";
 
 export function ClassListPage() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [inviteCode, setInviteCode] = useState("");
@@ -54,16 +56,19 @@ export function ClassListPage() {
 
   const handleJoinClass = async () => {
     if (!inviteCode.trim()) {
-      notify.warning("请输入邀请码");
+      notify.warning(t("notify.class.inviteCodeRequired"));
       return;
     }
     try {
       await joinClass.mutateAsync(inviteCode.trim());
-      notify.success("加入班级成功");
+      notify.success(t("notify.class.joinSuccess"));
       setInviteCode("");
       setIsJoinDialogOpen(false);
     } catch {
-      notify.error("加入失败", "邀请码无效或已加入该班级");
+      notify.error(
+        t("notify.class.joinFailed"),
+        t("notify.class.inviteCodeInvalid"),
+      );
     }
   };
 

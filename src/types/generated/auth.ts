@@ -21,4 +21,6 @@ export type RefreshTokenResponse = { access_token: string, expires_in: bigint, }
 
 export type TokenVerificationResponse = { is_valid: boolean, };
 
+export type UpdateProfileRequest = { display_name: string | null, email: string | null, password: string | null, avatar_url: string | null, };
+
 export type UserInfoResponse = { user: User, };

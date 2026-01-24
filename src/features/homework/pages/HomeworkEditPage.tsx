@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { FiArrowLeft, FiFile, FiUpload, FiX } from "react-icons/fi";
 import { Link, useNavigate, useParams } from "react-router";
 import { z } from "zod";
@@ -47,6 +48,7 @@ interface UploadedFile {
 }
 
 export function HomeworkEditPage() {
+  const { t } = useTranslation();
   const { classId, homeworkId } = useParams<{
     classId: string;
     homeworkId: string;
@@ -114,9 +116,9 @@ export function HomeworkEditPage() {
           },
         ]);
       }
-      notify.success("文件上传成功");
+      notify.success(t("notify.file.uploadSuccess"));
     } catch {
-      notify.error("文件上传失败");
+      notify.error(t("notify.file.uploadFailed"));
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -142,10 +144,13 @@ export function HomeworkEditPage() {
             ? uploadedFiles.map((f) => f.download_token)
             : null,
       });
-      notify.success("作业已更新");
+      notify.success(t("notify.homework.updateSuccess"));
       navigate(`${prefix}/classes/${classId}/homework/${homeworkId}`);
     } catch {
-      notify.error("更新失败", "请稍后重试");
+      notify.error(
+        t("notify.homework.updateFailed"),
+        t("notify.tryAgainLater"),
+      );
     }
   };
 

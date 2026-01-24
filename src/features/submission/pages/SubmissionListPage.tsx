@@ -10,7 +10,7 @@ import {
   FiUserX,
 } from "react-icons/fi";
 import { Link, useNavigate, useParams } from "react-router";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -381,7 +381,10 @@ export function SubmissionListPage() {
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarFallback>
+                <AvatarImage
+                  src={selectedStudent?.creator?.avatar_url || undefined}
+                />
+                <AvatarFallback className="bg-primary/10 text-primary">
                   {(selectedStudent?.creator.display_name ||
                     selectedStudent?.creator.username ||
                     "?")[0].toUpperCase()}
@@ -450,7 +453,7 @@ export function SubmissionListPage() {
                   >
                     <FiEdit3 className="mr-2 h-4 w-4" />
                     {selectedStudent?.grade
-                      ? t("submission.list.viewGrade") || "查看评分"
+                      ? t("submission.list.editGrade") || "修改评分"
                       : t("submission.list.goGrade") || "去批改"}
                   </Button>
                 </div>
@@ -558,7 +561,8 @@ function SubmittedStudentCard({
     >
       <div className="flex items-center gap-4">
         <Avatar>
-          <AvatarFallback>
+          <AvatarImage src={item.creator?.avatar_url || undefined} />
+          <AvatarFallback className="bg-primary/10 text-primary">
             {(item.creator.display_name ||
               item.creator.username ||
               "?")[0].toUpperCase()}
@@ -593,14 +597,23 @@ function SubmittedStudentCard({
       </div>
       <div className="flex items-center gap-3">
         {item.grade ? (
-          <div className="text-right">
-            <p className="font-bold text-lg">
-              {item.grade.score}
-              <span className="text-sm text-muted-foreground">
-                /{homework?.max_score}
-              </span>
-            </p>
-            {getStatusBadge("graded", item.latest_submission.is_late)}
+          <div className="flex items-center gap-2">
+            <div className="text-right">
+              <p className="font-bold text-lg">
+                {item.grade.score}
+                <span className="text-sm text-muted-foreground">
+                  /{homework?.max_score}
+                </span>
+              </p>
+              {getStatusBadge("graded", item.latest_submission.is_late)}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => onGradeClick(item.latest_submission.id, e)}
+            >
+              <FiEdit3 className="h-4 w-4" />
+            </Button>
           </div>
         ) : (
           <div className="flex items-center gap-2">
@@ -632,7 +645,8 @@ function UnsubmittedStudentCard({
     <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 opacity-75">
       <div className="flex items-center gap-4">
         <Avatar>
-          <AvatarFallback className="bg-muted">
+          <AvatarImage src={student?.avatar_url || undefined} />
+          <AvatarFallback className="bg-primary/10 text-primary">
             {(student.display_name || student.username || "?")[0].toUpperCase()}
           </AvatarFallback>
         </Avatar>

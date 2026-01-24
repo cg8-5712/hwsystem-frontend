@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FiArrowLeft,
   FiCopy,
@@ -20,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -64,6 +65,7 @@ const roleOrder: Record<string, number> = {
 };
 
 export function ClassStudentsPage() {
+  const { t } = useTranslation();
   const { classId } = useParams<{ classId: string }>();
   const prefix = useRoutePrefix();
   const { data: classData } = useClass(classId!);
@@ -115,9 +117,9 @@ export function ClassStudentsPage() {
   ) => {
     try {
       await updateRole.mutateAsync({ userId, role });
-      notify.success("角色已更新");
+      notify.success(t("notify.member.roleUpdated"));
     } catch {
-      notify.error("操作失败");
+      notify.error(t("notify.member.operationFailed"));
     }
   };
 
@@ -125,11 +127,11 @@ export function ClassStudentsPage() {
     if (!selectedMember) return;
     try {
       await removeMember.mutateAsync(selectedMember.id);
-      notify.success("成员已移除");
+      notify.success(t("notify.member.removed"));
       setRemoveDialogOpen(false);
       setSelectedMember(null);
     } catch {
-      notify.error("操作失败");
+      notify.error(t("notify.member.operationFailed"));
     }
   };
 
@@ -137,9 +139,9 @@ export function ClassStudentsPage() {
     if (!classData?.invite_code) return;
     try {
       await navigator.clipboard.writeText(classData.invite_code);
-      notify.success("邀请码已复制");
+      notify.success(t("notify.class.inviteCodeCopied"));
     } catch {
-      notify.error("复制失败");
+      notify.error(t("common.copyFailed"));
     }
   };
 
@@ -281,7 +283,10 @@ export function ClassStudentsPage() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
-                          <AvatarFallback className="text-xs">
+                          <AvatarImage
+                            src={member.user?.avatar_url || undefined}
+                          />
+                          <AvatarFallback className="text-xs bg-primary/10 text-primary">
                             {(member.user.display_name ||
                               member.user.username ||
                               "?")[0].toUpperCase()}

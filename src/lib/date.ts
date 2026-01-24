@@ -3,6 +3,8 @@
  * 统一项目中的日期显示格式
  */
 
+import i18next from "i18next";
+
 export type DateInput = string | number | Date;
 
 /**
@@ -119,18 +121,19 @@ export function formatDeadline(
   const isUrgent = !isExpired && diffHours <= 24;
   const isWarning = !isExpired && !isUrgent && diffDays <= 3;
 
+  const t = i18next.t.bind(i18next);
   let text: string;
   if (isExpired) {
-    text = locale === "zh-CN" ? "已截止" : "Expired";
+    text = t("date.expired");
   } else if (diffHours < 1) {
     const mins = Math.ceil(diffMs / (1000 * 60));
-    text = locale === "zh-CN" ? `${mins} 分钟后截止` : `Due in ${mins} minutes`;
+    text = t("date.dueInMinutes", { mins });
   } else if (diffHours < 24) {
     const hours = Math.ceil(diffHours);
-    text = locale === "zh-CN" ? `${hours} 小时后截止` : `Due in ${hours} hours`;
+    text = t("date.dueInHours", { hours });
   } else {
     const days = Math.ceil(diffDays);
-    text = locale === "zh-CN" ? `${days} 天后截止` : `Due in ${days} days`;
+    text = t("date.dueInDays", { days });
   }
 
   return { text, isExpired, isUrgent, isWarning };
@@ -156,11 +159,12 @@ export function formatShortDate(
     hour12: false,
   });
 
+  const t = i18next.t.bind(i18next);
   if (targetDay.getTime() === today.getTime()) {
-    return locale === "zh-CN" ? `今天 ${time}` : `Today ${time}`;
+    return `${t("date.today")} ${time}`;
   }
   if (targetDay.getTime() === yesterday.getTime()) {
-    return locale === "zh-CN" ? `昨天 ${time}` : `Yesterday ${time}`;
+    return `${t("date.yesterday")} ${time}`;
   }
 
   // 同一年

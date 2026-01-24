@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   FiAlertCircle,
   FiArrowLeft,
@@ -6,6 +7,18 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import { Link, useParams } from "react-router";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +33,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRoutePrefix } from "@/features/class/hooks/useClassBasePath";
 import { useHomework, useHomeworkStats } from "../hooks/useHomework";
 
+// 分数区间颜色
+const SCORE_COLORS = {
+  "90-100": "#22c55e", // green-500
+  "80-89": "#3b82f6", // blue-500
+  "70-79": "#eab308", // yellow-500
+  "60-69": "#f97316", // orange-500
+  "0-59": "#ef4444", // red-500
+} as const;
+
 export function HomeworkStatsPage() {
   const { classId, homeworkId } = useParams<{
     classId: string;
@@ -28,6 +50,27 @@ export function HomeworkStatsPage() {
   const prefix = useRoutePrefix();
   const { data: homework } = useHomework(homeworkId!);
   const { data: stats, isLoading, error } = useHomeworkStats(homeworkId!);
+
+  // 准备图表数据
+  const chartData = useMemo(() => {
+    if (!stats?.score_distribution) return [];
+    return stats.score_distribution.map((item) => ({
+      range: item.range,
+      count: Number(item.count),
+      color: SCORE_COLORS[item.range as keyof typeof SCORE_COLORS] || "#6b7280",
+    }));
+  }, [stats?.score_distribution]);
+
+  // 提交状态饼图数据
+  const submissionPieData = useMemo(() => {
+    if (!stats) return [];
+    const submitted = stats.submitted_count || 0;
+    const unsubmitted = (stats.total_students || 0) - submitted;
+    return [
+      { name: "已提交", value: submitted, color: "#22c55e" },
+      { name: "未提交", value: unsubmitted, color: "#ef4444" },
+    ].filter((item) => item.value > 0);
+  }, [stats]);
 
   if (error) {
     return (
@@ -130,7 +173,7 @@ export function HomeworkStatsPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* 提交率 */}
+        {/* 提交率饼图 */}
         <Card>
           <CardHeader>
             <CardTitle>提交率</CardTitle>
@@ -140,12 +183,36 @@ export function HomeworkStatsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <Progress value={submissionRate} className="h-3" />
-              <p className="text-2xl font-bold text-center">
-                {submissionRate.toFixed(1)}%
-              </p>
-            </div>
+            {submissionPieData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={submissionPieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={2}
+                    dataKey="value"
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
+                  >
+                    {submissionPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="space-y-2">
+                <Progress value={submissionRate} className="h-3" />
+                <p className="text-2xl font-bold text-center">
+                  {submissionRate.toFixed(1)}%
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -179,36 +246,44 @@ export function HomeworkStatsPage() {
           </CardContent>
         </Card>
 
-        {/* 分数分布 */}
+        {/* 分数分布柱状图 */}
         <Card>
           <CardHeader>
             <CardTitle>分数分布</CardTitle>
+            <CardDescription>
+              基于已批改的 {stats?.graded_count || 0} 份作业
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            {stats?.score_distribution &&
-            stats.score_distribution.length > 0 ? (
-              <div className="space-y-3">
-                {stats.score_distribution.map((item) => (
-                  <div key={item.range} className="flex items-center gap-3">
-                    <span className="w-16 text-sm text-muted-foreground">
-                      {item.range}
-                    </span>
-                    <div className="flex-1">
-                      <Progress
-                        value={
-                          stats.graded_count
-                            ? (Number(item.count) /
-                                Number(stats.graded_count)) *
-                              100
-                            : 0
-                        }
-                        className="h-2"
-                      />
-                    </div>
-                    <span className="w-8 text-sm text-right">{item.count}</span>
-                  </div>
-                ))}
-              </div>
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                >
+                  <XAxis
+                    dataKey="range"
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => [`${value} 人`, "人数"]}
+                    labelFormatter={(label) => `分数段: ${label}`}
+                  />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             ) : (
               <p className="text-center text-muted-foreground py-4">暂无数据</p>
             )}

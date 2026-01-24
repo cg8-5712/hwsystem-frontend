@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   FiArrowLeft,
   FiCopy,
@@ -34,6 +35,7 @@ import { useClass, useDeleteClass } from "../hooks/useClass";
 import { useRoutePrefix } from "../hooks/useClassBasePath";
 
 export function ClassDetailPage() {
+  const { t } = useTranslation();
   const { classId } = useParams<{ classId: string }>();
   const navigate = useNavigate();
   const user = useCurrentUser();
@@ -52,17 +54,17 @@ export function ClassDetailPage() {
   const handleCopyInviteCode = () => {
     if (classData?.invite_code) {
       navigator.clipboard.writeText(classData.invite_code);
-      notify.success("已复制邀请码");
+      notify.success(t("notify.class.inviteCodeCopied"));
     }
   };
 
   const handleDeleteClass = async () => {
     try {
       await deleteClass.mutateAsync(classId!);
-      notify.success("班级已删除");
+      notify.success(t("notify.class.deleteSuccess"));
       navigate(`${prefix}/classes`);
     } catch {
-      notify.error("删除失败");
+      notify.error(t("notify.class.deleteFailed"));
     }
   };
 

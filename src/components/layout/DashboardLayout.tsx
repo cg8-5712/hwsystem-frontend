@@ -10,7 +10,7 @@ import {
 } from "react-icons/fi";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -113,8 +113,9 @@ export function DashboardLayout({ navItems, titleKey }: DashboardLayoutProps) {
                   variant="ghost"
                   className="w-full justify-start gap-2 px-2"
                 >
-                  <Avatar className={`h-8 w-8 ${avatarColor}`}>
-                    <AvatarFallback className="text-white text-sm">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={currentUser?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
                       {avatar}
                     </AvatarFallback>
                   </Avatar>
@@ -179,11 +180,6 @@ export const teacherNavItems: NavItem[] = [
     to: "/teacher/homeworks",
     labelKey: "sidebar.assignedHomeworks",
     icon: FiClipboard,
-  },
-  {
-    to: "/teacher/students",
-    labelKey: "sidebar.studentManagement",
-    icon: FiUsers,
   },
 ];
 

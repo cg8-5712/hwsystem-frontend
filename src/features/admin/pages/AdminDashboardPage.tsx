@@ -10,6 +10,7 @@ import {
 } from "react-icons/fi";
 import { Link } from "react-router";
 import { PageHeader, StatCard } from "@/components/common";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,9 +123,12 @@ export function AdminDashboardPage() {
                   className="flex items-center justify-between p-6 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                      {(u.display_name || u.username).charAt(0).toUpperCase()}
-                    </div>
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={u.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
+                        {(u.display_name || u.username).charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
                       <Link
                         to={`/admin/users/${u.id}`}

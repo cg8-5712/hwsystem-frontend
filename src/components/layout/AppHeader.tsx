@@ -12,7 +12,7 @@ import {
   FiX,
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -163,8 +163,11 @@ export function AppHeader() {
                       variant="ghost"
                       className="relative h-9 w-9 rounded-full p-0"
                     >
-                      <Avatar className={avatarColor}>
-                        <AvatarFallback className="text-white font-medium">
+                      <Avatar>
+                        <AvatarImage
+                          src={currentUser?.avatar_url || undefined}
+                        />
+                        <AvatarFallback className="bg-primary/10 text-primary font-medium">
                           {avatar}
                         </AvatarFallback>
                       </Avatar>

@@ -1,7 +1,7 @@
+import { useTranslation } from "react-i18next";
 import {
   FiArrowLeft,
   FiBarChart2,
-  FiClock,
   FiEdit2,
   FiPaperclip,
   FiTrash2,
@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,7 @@ import { useCurrentUser } from "@/stores/useUserStore";
 import { useDeleteHomework, useHomework } from "../hooks/useHomework";
 
 export function HomeworkDetailPage() {
+  const { t } = useTranslation();
   const { classId, homeworkId } = useParams<{
     classId: string;
     homeworkId: string;
@@ -61,15 +63,15 @@ export function HomeworkDetailPage() {
   const isDeadlinePassed = homework?.deadline
     ? new Date(homework.deadline) < new Date()
     : false;
-  const canSubmit = !isDeadlinePassed || homework?.allow_late_submission;
+  const canSubmit = !isDeadlinePassed || homework?.allow_late;
 
   const handleDelete = async () => {
     try {
       await deleteHomework.mutateAsync(homeworkId!);
-      notify.success("作业已删除");
+      notify.success(t("notify.homework.deleteSuccess"));
       navigate(`${prefix}/classes/${classId}`);
     } catch {
-      notify.error("删除失败");
+      notify.error(t("notify.homework.deleteFailed"));
     }
   };
 
@@ -288,26 +290,36 @@ export function HomeworkDetailPage() {
               {homework?.creator && (
                 <div>
                   <p className="text-sm text-muted-foreground">创建者</p>
-                  <p className="font-medium">
-                    {homework.creator.display_name || homework.creator.username}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage
+                        src={homework.creator?.avatar_url || undefined}
+                      />
+                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                        {(homework.creator.display_name ||
+                          homework.creator.username ||
+                          "?")[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <p className="font-medium">
+                      {homework.creator.display_name ||
+                        homework.creator.username}
+                    </p>
+                  </div>
                 </div>
               )}
-              <div className="flex items-center gap-2">
-                <FiClock className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">截止时间</p>
-                  <p className="font-medium">
-                    {homework?.deadline
-                      ? new Date(homework.deadline).toLocaleString()
-                      : "无截止时间"}
-                  </p>
-                </div>
+              <div>
+                <p className="text-sm text-muted-foreground">截止时间</p>
+                <p className="font-medium">
+                  {homework?.deadline
+                    ? new Date(homework.deadline).toLocaleString()
+                    : "无截止时间"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">允许迟交</p>
                 <p className="font-medium">
-                  {homework?.allow_late_submission ? "是" : "否"}
+                  {homework?.allow_late ? "是" : "否"}
                 </p>
               </div>
               <div>

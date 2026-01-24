@@ -22,7 +22,93 @@
     "unknownError": "发生未知错误，请稍后重试",
     "operationFailed": "操作失败",
     "retry": "重试",
-    "refresh": "刷新"
+    "refresh": "刷新",
+    "copySuccess": "已复制到剪贴板",
+    "copyFailed": "复制失败"
+  },
+  "notify": {
+    "file": {
+      "uploadSuccess": "文件上传成功",
+      "uploadFailed": "文件上传失败"
+    },
+    "submission": {
+      "success": "作业提交成功",
+      "failed": "提交失败",
+      "contentRequired": "请填写作业内容或上传附件"
+    },
+    "settings": {
+      "noChanges": "没有需要保存的更改",
+      "updated": "个人资料已更新",
+      "updateFailed": "更新失败"
+    },
+    "class": {
+      "createSuccess": "班级创建成功",
+      "createFailed": "创建失败",
+      "updateSuccess": "班级信息已更新",
+      "updateFailed": "更新失败",
+      "deleteSuccess": "班级已删除",
+      "deleteFailed": "删除失败",
+      "joinSuccess": "加入班级成功",
+      "joinFailed": "加入失败",
+      "inviteCodeRequired": "请输入邀请码",
+      "inviteCodeInvalid": "邀请码无效或已加入该班级",
+      "inviteCodeCopied": "邀请码已复制"
+    },
+    "member": {
+      "roleUpdated": "角色已更新",
+      "removed": "成员已移除",
+      "operationFailed": "操作失败"
+    },
+    "homework": {
+      "createSuccess": "作业创建成功",
+      "createFailed": "创建失败",
+      "updateSuccess": "作业已更新",
+      "updateFailed": "更新失败",
+      "deleteSuccess": "作业已删除",
+      "deleteFailed": "删除失败"
+    },
+    "notification": {
+      "markedAllRead": "已全部标记为已读",
+      "deleteSuccess": "通知已删除",
+      "deleteFailed": "删除失败",
+      "operationFailed": "操作失败"
+    },
+    "user": {
+      "batchDeleteSuccess": "成功删除 {{count}} 个用户",
+      "batchDeleteFailed": "批量删除失败",
+      "exportSuccess": "已导出 {{count}} 个用户"
+    },
+    "auth": {
+      "loginRequired": "请先登录"
+    },
+    "tryAgainLater": "请稍后重试"
+  },
+  "date": {
+    "expired": "已截止",
+    "dueInMinutes": "{{mins}} 分钟后截止",
+    "dueInHours": "{{hours}} 小时后截止",
+    "dueInDays": "{{days}} 天后截止",
+    "today": "今天",
+    "yesterday": "昨天",
+    "tomorrow": "明天",
+    "daysAgo": "{{days}} 天前",
+    "daysLater": "{{days}} 天后"
+  },
+  "batch": {
+    "deselectAll": "取消全选",
+    "selectAll": "全选",
+    "clear": "取消",
+    "selected": "已选择 {{count}} / {{total}} 项"
+  },
+  "pagination": {
+    "total": "共 {{count}} 条",
+    "perPage": "每页",
+    "items": "条",
+    "firstPage": "首页",
+    "prevPage": "上一页",
+    "nextPage": "下一页",
+    "lastPage": "末页",
+    "goToPage": "第 {{page}} 页"
   },
   "sidebar": {
     "navigation": "导航",
@@ -112,7 +198,7 @@
     }
   },
   "footer": {
-    "copyright": "© 2022-{year} 作业管理系统. 保留所有权利.",
+    "copyright": "© 2022-{{year}} 作业管理系统. 保留所有权利.",
     "about": "关于我们",
     "contact": "联系我们",
     "privacy": "隐私政策",
@@ -139,13 +225,13 @@
       },
       "success": {
         "title": "登录成功",
-        "message": "欢迎回来，{name}！正在跳转到控制台..."
+        "message": "欢迎回来，{{name}}！正在跳转到控制台..."
       }
     },
     "logout": {
       "success": {
         "title": "已安全退出",
-        "message": "再见，{name}！期待您的再次光临。"
+        "message": "再见，{{name}}！期待您的再次光临。"
       }
     },
     "forgotPassword": {
@@ -248,7 +334,7 @@
       "subtitle": "为每个角色量身定制",
       "description": "不同的角色拥有不同的功能权限，确保系统的安全性和易用性",
       "dashboard": "前往控制台",
-      "loginAs": "以{role}身份登录",
+      "loginAs": "以{{role}}身份登录",
       "items": {
         "student": {
           "name": "学生",
@@ -297,7 +383,7 @@
   },
   "about": {
     "title": "关于作业管理系统",
-    "subtitle": "现代化的教学作业管理平台，基于 Vue 3 + TypeScript 构建",
+    "subtitle": "现代化的教学作业管理平台，基于 React 19 + TypeScript 构建",
     "features": {
       "title": "产品特色",
       "subtitle": "为教育场景精心打造",
@@ -313,7 +399,7 @@
         },
         "modernTech": {
           "title": "现代化技术栈",
-          "description": "Vue 3 + Composition API + TypeScript，类型安全和开发体验"
+          "description": "React 19 + Hooks + TypeScript，类型安全和开发体验"
         },
         "darkMode": {
           "title": "深色模式",
@@ -335,11 +421,11 @@
       "description": "采用业界最佳实践，确保项目的可维护性和扩展性",
       "frontend": {
         "title": "前端技术栈",
-        "vue": "渐进式 JavaScript 框架",
+        "react": "用于构建用户界面的 JavaScript 库",
         "typescript": "类型安全的 JavaScript 超集",
         "vite": "下一代前端构建工具",
         "tailwind": "实用优先的 CSS 框架",
-        "pinia": "Vue.js 状态管理库"
+        "zustand": "轻量级 React 状态管理库"
       },
       "backend": {
         "title": "后端技术栈",
@@ -393,8 +479,8 @@
       "title": "联系方式",
       "email": {
         "title": "邮箱地址",
-        "support": "support{'@'}hwsystem.com",
-        "admin": "admin{'@'}hwsystem.com"
+        "support": "support@hwsystem.com",
+        "admin": "admin@hwsystem.com"
       },
       "phone": {
         "title": "联系电话",

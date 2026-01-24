@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
@@ -12,7 +12,7 @@ import {
 import { useLocation, useNavigate, useParams } from "react-router";
 import { z } from "zod";
 import { FilePreviewDialog } from "@/components/file/FilePreviewDialog";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +32,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useRoutePrefix } from "@/features/class/hooks/useClassBasePath";
@@ -39,6 +46,43 @@ import { useSubmission } from "@/features/submission/hooks/useSubmission";
 import type { GradeNavigationState } from "@/features/submission/pages/SubmissionListPage";
 import { notify } from "@/stores/useNotificationStore";
 import { useCreateGrade, useGrade, useUpdateGrade } from "../hooks/useGrade";
+
+// 快速评分预设
+const QUICK_SCORES = [
+  { label: "优秀", score: 100, color: "bg-green-500" },
+  { label: "良好", score: 85, color: "bg-blue-500" },
+  { label: "中等", score: 75, color: "bg-yellow-500" },
+  { label: "及格", score: 60, color: "bg-orange-500" },
+] as const;
+
+// 常用评语模板
+const COMMENT_TEMPLATES = [
+  {
+    id: "excellent",
+    label: "完成度高，代码规范",
+    value: "完成度高，代码规范，逻辑清晰。继续保持！",
+  },
+  {
+    id: "good",
+    label: "整体不错，有小问题",
+    value: "整体完成度不错，但有一些小问题需要改进。建议仔细检查细节。",
+  },
+  {
+    id: "needImprove",
+    label: "需要改进",
+    value: "作业完成度一般，需要加强理解和练习。建议课后多复习相关内容。",
+  },
+  {
+    id: "late",
+    label: "迟交扣分",
+    value: "作业迟交，已酌情扣分。请注意按时提交。",
+  },
+  {
+    id: "incomplete",
+    label: "不完整",
+    value: "作业不完整，缺少关键部分。请补充完整后重新提交。",
+  },
+] as const;
 
 const formSchema = z.object({
   score: z.number().min(0, "分数不能为负"),
@@ -288,10 +332,10 @@ export function GradePage() {
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">v{submission?.version}</Badge>
                   {submission?.is_late && (
-                    <Badge variant="secondary">
-                      <FiClock className="mr-1 h-3 w-3" />
+                    <span className="flex items-center gap-1 text-orange-600 font-medium">
+                      <FiClock className="h-4 w-4" />
                       {t("submission.list.filter.late") || "迟交"}
-                    </Badge>
+                    </span>
                   )}
                 </div>
               </div>
@@ -342,7 +386,10 @@ export function GradePage() {
             <CardContent>
               <div className="flex items-center gap-3">
                 <Avatar>
-                  <AvatarFallback>
+                  <AvatarImage
+                    src={submission?.creator?.avatar_url || undefined}
+                  />
+                  <AvatarFallback className="bg-primary/10 text-primary">
                     {(submission?.creator?.display_name ||
                       submission?.creator?.username ||
                       "?")[0].toUpperCase()}
@@ -387,6 +434,36 @@ export function GradePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t("grade.score") || "分数"}</FormLabel>
+                        {/* 快速评分按钮 */}
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {QUICK_SCORES.map((preset) => {
+                            // 根据满分比例计算实际分数
+                            const maxScore =
+                              submission?.homework?.max_score || 100;
+                            const actualScore = Math.round(
+                              (preset.score / 100) * maxScore,
+                            );
+                            return (
+                              <Button
+                                key={preset.label}
+                                type="button"
+                                variant={
+                                  field.value === actualScore
+                                    ? "default"
+                                    : "outline"
+                                }
+                                size="sm"
+                                onClick={() => field.onChange(actualScore)}
+                                className="cursor-pointer"
+                              >
+                                <span
+                                  className={`w-2 h-2 rounded-full ${preset.color} mr-1.5`}
+                                />
+                                {preset.label} ({actualScore})
+                              </Button>
+                            );
+                          })}
+                        </div>
                         <FormControl>
                           <Input
                             type="number"
@@ -416,6 +493,37 @@ export function GradePage() {
                           {t("grade.comment") || "评语"}（
                           {t("grade.optional") || "可选"}）
                         </FormLabel>
+                        {/* 常用评语下拉 */}
+                        <Select
+                          onValueChange={(value) => {
+                            const template = COMMENT_TEMPLATES.find(
+                              (t) => t.id === value,
+                            );
+                            if (template) {
+                              // 追加到现有评语（如果有的话）
+                              const currentComment = field.value || "";
+                              const newComment = currentComment
+                                ? `${currentComment}\n${template.value}`
+                                : template.value;
+                              field.onChange(newComment);
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-full mb-2">
+                            <SelectValue
+                              placeholder={
+                                t("grade.selectTemplate") || "选择常用评语..."
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {COMMENT_TEMPLATES.map((template) => (
+                              <SelectItem key={template.id} value={template.id}>
+                                {template.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormControl>
                           <Textarea
                             placeholder={

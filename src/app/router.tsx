@@ -44,6 +44,8 @@ import { HomePage } from "@/features/public/pages/HomePage";
 import { NotFoundPage } from "@/features/public/pages/NotFoundPage";
 import { PrivacyPage } from "@/features/public/pages/PrivacyPage";
 import { TermsPage } from "@/features/public/pages/TermsPage";
+// 设置页面
+import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { MySubmissionsPage } from "@/features/submission/pages/MySubmissionsPage";
 import { SubmissionListPage } from "@/features/submission/pages/SubmissionListPage";
 // 提交页面
@@ -51,7 +53,6 @@ import { SubmitHomeworkPage } from "@/features/submission/pages/SubmitHomeworkPa
 import { TeacherDashboardPage } from "@/features/teacher/pages/TeacherDashboardPage";
 // 教师页面
 import { TeacherIndexPage } from "@/features/teacher/pages/TeacherIndexPage";
-import { HomeworkPage } from "@/features/user/pages/HomeworkPage";
 import { UserDashboardPage } from "@/features/user/pages/UserDashboardPage";
 // 学生页面
 import { UserIndexPage } from "@/features/user/pages/UserIndexPage";
@@ -126,6 +127,19 @@ function NotificationLayout() {
   );
 }
 
+// 设置页面布局组件 - 根据用户角色选择对应的导航项
+function SettingsLayout() {
+  const user = useCurrentUser();
+  const navItems =
+    user?.role === "admin"
+      ? adminNavItems
+      : user?.role === "teacher"
+        ? teacherNavItems
+        : userNavItems;
+
+  return <DashboardLayout navItems={navItems} titleKey="common.settings" />;
+}
+
 export const router = createBrowserRouter([
   // 公共页面 (DefaultLayout)
   {
@@ -165,7 +179,6 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <UserIndexPage /> },
       { path: "dashboard", element: <UserDashboardPage /> },
-      { path: "homework/:id", element: <HomeworkPage /> },
       // 班级
       { path: "classes", element: <ClassListPage /> },
       { path: "classes/:classId", element: <ClassDetailPage /> },
@@ -195,6 +208,14 @@ export const router = createBrowserRouter([
     element: <NotificationLayout />,
     loader: requireRole(["user", "teacher", "admin"]),
     children: [{ index: true, element: <NotificationListPage /> }],
+  },
+
+  // 设置页面 (所有登录用户可访问)
+  {
+    path: "/settings",
+    element: <SettingsLayout />,
+    loader: requireRole(["user", "teacher", "admin"]),
+    children: [{ index: true, element: <SettingsPage /> }],
   },
 
   // 教师页面 (teacher 和 admin 可访问)
