@@ -4,6 +4,8 @@ import type {
   CreateUserRequest,
   UpdateUserRequest,
   User,
+  UserExportParams,
+  UserImportResponse,
   UserListResponse,
   UserResponse,
   UserRole,
@@ -22,6 +24,7 @@ export interface UserListParams {
 // API 响应类型 - 直接使用生成类型的 Stringify 版本
 export type UserDetail = Stringify<User>;
 export type UserListResponseStringified = Stringify<UserListResponse>;
+export type UserImportResponseStringified = Stringify<UserImportResponse>;
 
 export const userService = {
   list: async (
@@ -65,6 +68,44 @@ export const userService = {
   delete: async (id: string): Promise<void> => {
     await api.delete(`/users/${id}`);
   },
+
+  // 导出用户
+  export: async (params: UserExportParams): Promise<Blob> => {
+    const response = await api.get(`/users/export`, {
+      params,
+      responseType: "blob",
+    });
+    return response.data;
+  },
+
+  // 导入用户
+  import: async (file: File): Promise<UserImportResponseStringified> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await api.post<{
+      data: Stringify<UserImportResponse>;
+    }>("/users/import", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data.data;
+  },
+
+  // 下载导入模板
+  downloadTemplate: async (format: "csv" | "xlsx" = "csv"): Promise<Blob> => {
+    const response = await api.get(`/users/import/template`, {
+      params: { format },
+      responseType: "blob",
+    });
+    return response.data;
+  },
 };
 
-export type { UserRole, UserStatus, CreateUserRequest, UpdateUserRequest };
+export type {
+  UserRole,
+  UserStatus,
+  CreateUserRequest,
+  UpdateUserRequest,
+  UserExportParams,
+};

@@ -5,6 +5,8 @@ import {
   type CreateUserRequest,
   type UpdateUserRequest,
   type UserDetail,
+  type UserExportParams,
+  type UserImportResponseStringified,
   type UserListParams,
   userService,
 } from "../services/userService";
@@ -91,4 +93,72 @@ export function useDeleteUser() {
   });
 }
 
-export type { UserDetail, CreateUserRequest, UpdateUserRequest };
+// 导入用户
+export function useImportUsers() {
+  const queryClient = useQueryClient();
+  const { handleError } = useApiError();
+
+  return useMutation({
+    mutationFn: (file: File) => userService.import(file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+    },
+    onError: (err) => {
+      handleError(err, { title: "导入失败" });
+    },
+  });
+}
+
+// 导出用户
+export function useExportUsers() {
+  const { handleError } = useApiError();
+  const success = useNotificationStore((s) => s.success);
+
+  return useMutation({
+    mutationFn: (params: UserExportParams) => userService.export(params),
+    onSuccess: (blob, params) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `users.${params.format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      success("导出成功", "用户数据已下载");
+    },
+    onError: (err) => {
+      handleError(err, { title: "导出失败" });
+    },
+  });
+}
+
+// 下载导入模板
+export function useDownloadImportTemplate() {
+  const { handleError } = useApiError();
+
+  return useMutation({
+    mutationFn: (format: "csv" | "xlsx") =>
+      userService.downloadTemplate(format),
+    onSuccess: (blob, format) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `user_import_template.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+    onError: (err) => {
+      handleError(err, { title: "下载模板失败" });
+    },
+  });
+}
+
+export type {
+  UserDetail,
+  CreateUserRequest,
+  UpdateUserRequest,
+  UserImportResponseStringified,
+};

@@ -12,6 +12,7 @@
     "edit": "编辑",
     "delete": "删除",
     "cancel": "取消",
+    "close": "关闭",
     "confirm": "确认",
     "save": "保存",
     "loading": "加载中...",
@@ -774,6 +775,11 @@
     "classAlreadyJoined": "已加入该班级",
     "classJoinForbidden": "不允许加入该班级",
     "classUserNotFound": "班级成员不存在",
+    "importFileParseFailed": "导入文件解析失败",
+    "importFileFormatInvalid": "导入文件格式无效",
+    "importFileMissingColumn": "导入文件缺少必需列",
+    "importFileDataInvalid": "导入文件数据无效",
+    "exportFailed": "导出失败",
     "refreshUserInfoFailed": "刷新用户信息失败",
     "notFound": {
       "title": "页面未找到",
@@ -845,6 +851,27 @@
       "deleteConfirmTitle": "确认删除班级？",
       "deleteConfirmDesc": "即将删除班级「{{name}}」，此操作不可撤销。删除后所有作业和成绩数据都将被永久删除。",
       "deleting": "删除中..."
+    },
+    "users": {
+      "import": {
+        "title": "导入用户",
+        "description": "上传 CSV 或 XLSX 文件批量创建用户",
+        "downloadTemplate": "下载模板：",
+        "dropzone": "拖拽文件到此处，或点击选择文件",
+        "supportedFormats": "支持 CSV、XLSX 格式",
+        "total": "总计",
+        "success": "成功",
+        "skipped": "跳过",
+        "failed": "失败",
+        "row": "第 {{row}} 行",
+        "moreErrors": "还有 {{count}} 个错误...",
+        "importing": "导入中...",
+        "import": "开始导入"
+      },
+      "export": {
+        "csv": "导出 CSV",
+        "xlsx": "导出 XLSX"
+      }
     }
   },
   "homework": {

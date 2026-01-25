@@ -61,6 +61,12 @@ const errorCodeToI18nKey: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.ClassAlreadyJoined]: "error.classAlreadyJoined",
   [ErrorCode.ClassJoinForbidden]: "error.classJoinForbidden",
   [ErrorCode.ClassUserNotFound]: "error.classUserNotFound",
+  // 导入/导出
+  [ErrorCode.ImportFileParseFailed]: "error.importFileParseFailed",
+  [ErrorCode.ImportFileFormatInvalid]: "error.importFileFormatInvalid",
+  [ErrorCode.ImportFileMissingColumn]: "error.importFileMissingColumn",
+  [ErrorCode.ImportFileDataInvalid]: "error.importFileDataInvalid",
+  [ErrorCode.ExportFailed]: "error.exportFailed",
 };
 
 /** 获取友好错误消息 */

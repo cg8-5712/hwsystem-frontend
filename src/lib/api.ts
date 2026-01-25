@@ -64,6 +64,11 @@ api.interceptors.request.use(
 // 响应拦截器：处理业务状态码和错误
 api.interceptors.response.use(
   (response: AxiosResponse<ApiResponse<unknown>>) => {
+    // Blob 响应直接放行（文件下载）
+    if (response.config.responseType === "blob") {
+      return response;
+    }
+
     const { data } = response;
 
     // 业务成功
@@ -147,7 +152,17 @@ api.interceptors.response.use(
       });
     }
 
-    // 其他 HTTP 错误
+    // 其他 HTTP 错误 - 优先从响应体获取业务错误码
+    const errorData = error.response.data as ApiResponse<unknown> | undefined;
+    if (errorData?.code && errorData.code !== 0) {
+      return Promise.reject({
+        code: errorData.code,
+        message: getErrorMessage(errorData.code, errorData.message),
+        timestamp: errorData.timestamp,
+      });
+    }
+
+    // 无业务错误码时 fallback 到 HTTP 状态码
     return Promise.reject({
       code: error.response.status,
       message: getErrorMessage(error.response.status, error.message),

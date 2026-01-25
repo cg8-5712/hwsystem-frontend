@@ -12,6 +12,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "cancel": "Cancel",
+    "close": "Close",
     "confirm": "Confirm",
     "save": "Save",
     "loading": "Loading...",
@@ -774,6 +775,11 @@
     "classAlreadyJoined": "Already joined this class",
     "classJoinForbidden": "Not allowed to join this class",
     "classUserNotFound": "Class member not found",
+    "importFileParseFailed": "Failed to parse import file",
+    "importFileFormatInvalid": "Invalid import file format",
+    "importFileMissingColumn": "Import file missing required column",
+    "importFileDataInvalid": "Invalid import file data",
+    "exportFailed": "Export failed",
     "refreshUserInfoFailed": "Failed to refresh user info",
     "notFound": {
       "title": "Page Not Found",
@@ -845,6 +851,27 @@
       "deleteConfirmTitle": "Delete this class?",
       "deleteConfirmDesc": "Class \"{{name}}\" will be permanently deleted. All homework and grade data will be lost.",
       "deleting": "Deleting..."
+    },
+    "users": {
+      "import": {
+        "title": "Import Users",
+        "description": "Upload CSV or XLSX file to create users in batch",
+        "downloadTemplate": "Download template:",
+        "dropzone": "Drop file here, or click to select",
+        "supportedFormats": "Supports CSV, XLSX formats",
+        "total": "Total",
+        "success": "Success",
+        "skipped": "Skipped",
+        "failed": "Failed",
+        "row": "Row {{row}}",
+        "moreErrors": "{{count}} more errors...",
+        "importing": "Importing...",
+        "import": "Start Import"
+      },
+      "export": {
+        "csv": "Export CSV",
+        "xlsx": "Export XLSX"
+      }
     }
   },
   "homework": {

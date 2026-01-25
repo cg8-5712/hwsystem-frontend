@@ -7,6 +7,7 @@ import {
   FiPlus,
   FiSearch,
   FiTrash2,
+  FiUpload,
   FiUserMinus,
 } from "react-icons/fi";
 import { Link } from "react-router";
@@ -44,6 +45,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { notify } from "@/stores/useNotificationStore";
+import { UserExportDialog } from "../components/UserExportDialog";
+import { UserImportDialog } from "../components/UserImportDialog";
 import { type UserDetail, useDeleteUser, useUserList } from "../hooks/useUsers";
 import type { UserRole, UserStatus } from "../services/userService";
 
@@ -82,6 +85,8 @@ export default function UserListPage() {
   const [roleFilter, setRoleFilter] = useState<UserRole | "all">("all");
   const [statusFilter, setStatusFilter] = useState<UserStatus | "all">("all");
   const [deleteTarget, setDeleteTarget] = useState<UserDetail | null>(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   // 批量选择状态
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -153,42 +158,6 @@ export default function UserListPage() {
     }
   };
 
-  // 导出 CSV
-  const handleExportCSV = () => {
-    const exportItems =
-      selectedIds.size > 0
-        ? items.filter((item) => selectedIds.has(item.id))
-        : items;
-
-    const headers = ["用户名", "邮箱", "显示名", "角色", "状态", "创建时间"];
-    const rows = exportItems.map((user) => [
-      user.username,
-      user.email,
-      user.display_name || "",
-      roleLabels[user.role],
-      statusLabels[user.status],
-      new Date(user.created_at).toLocaleDateString("zh-CN"),
-    ]);
-
-    const csvContent = [headers, ...rows]
-      .map((row) => row.map((cell) => `"${cell}"`).join(","))
-      .join("\n");
-
-    const blob = new Blob([`\uFEFF${csvContent}`], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `users_${new Date().toISOString().split("T")[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-
-    notify.success(
-      t("notify.user.exportSuccess", { count: exportItems.length }),
-    );
-  };
-
   const handleDelete = async () => {
     if (!deleteTarget) return;
     await deleteUser.mutateAsync(deleteTarget.id);
@@ -222,12 +191,22 @@ export default function UserListPage() {
           <h1 className="text-2xl font-bold">用户管理</h1>
           <p className="text-muted-foreground">管理系统中的所有用户</p>
         </div>
-        <Button asChild>
-          <Link to="/admin/users/create">
-            <FiPlus className="mr-2 h-4 w-4" />
-            创建用户
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
+            <FiDownload className="mr-2 h-4 w-4" />
+            导出
+          </Button>
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <FiUpload className="mr-2 h-4 w-4" />
+            导入
+          </Button>
+          <Button asChild>
+            <Link to="/admin/users/create">
+              <FiPlus className="mr-2 h-4 w-4" />
+              创建用户
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* 筛选栏 */}
@@ -294,11 +273,6 @@ export default function UserListPage() {
         onClearSelection={clearSelection}
         isAllSelected={isAllSelected}
         actions={[
-          {
-            label: "导出 CSV",
-            icon: <FiDownload className="h-4 w-4" />,
-            onClick: handleExportCSV,
-          },
           {
             label: "批量删除",
             icon: <FiUserMinus className="h-4 w-4" />,
@@ -478,6 +452,23 @@ export default function UserListPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 导入用户对话框 */}
+      <UserImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+      />
+
+      {/* 导出用户对话框 */}
+      <UserExportDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+        currentFilters={{
+          role: roleFilter,
+          status: statusFilter,
+          search: debouncedSearch,
+        }}
+      />
     </div>
   );
 }
