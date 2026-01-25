@@ -158,3 +158,18 @@ export function useRemoveMember(classId: string) {
     },
   });
 }
+
+export function useLeaveClass() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ classId, userId }: { classId: string; userId: string }) =>
+      classService.leaveClass(classId, userId),
+    onSuccess: () => {
+      // 刷新班级列表（用户已退出，列表会减少）
+      queryClient.invalidateQueries({ queryKey: classKeys.lists() });
+      // 刷新所有班级相关数据
+      queryClient.invalidateQueries({ queryKey: classKeys.all });
+    },
+  });
+}

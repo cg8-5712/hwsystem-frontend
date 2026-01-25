@@ -94,7 +94,10 @@ export function GradePage() {
 
   const createGrade = useCreateGrade(submissionId!, homeworkId);
   // useUpdateGrade 需要 gradeId，在有 existingGrade 时才能使用
-  const updateGrade = useUpdateGrade(existingGrade?.id || "", homeworkId);
+  const updateGrade = useUpdateGrade(existingGrade?.id || "", {
+    submissionId,
+    homeworkId,
+  });
 
   const isEditing = !!existingGrade;
 

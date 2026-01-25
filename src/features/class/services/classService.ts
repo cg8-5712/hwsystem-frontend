@@ -130,6 +130,11 @@ export const classService = {
     await api.delete(`/classes/${classId}/students/${userId}`);
   },
 
+  // 退出班级（学生自行退出）
+  leaveClass: async (classId: string, userId: string) => {
+    await api.delete(`/classes/${classId}/students/${userId}`);
+  },
+
   // 导出班级报表
   exportClassReport: async (classId: string) => {
     const response = await api.get(`/classes/${classId}/export`, {

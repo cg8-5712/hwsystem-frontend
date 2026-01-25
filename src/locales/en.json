@@ -1059,7 +1059,16 @@
     "exportReport": "Export Report",
     "exporting": "Exporting...",
     "exportSuccess": "Report exported successfully",
-    "exportFailed": "Export failed"
+    "exportFailed": "Export failed",
+    "leave": "Leave Class",
+    "leaveSuccess": "Left class successfully",
+    "leaveFailed": "Failed to leave",
+    "leaveConfirm": {
+      "title": "Leave this class?",
+      "description": "Are you sure you want to leave \"{{name}}\"? You will need a new invite code to rejoin.",
+      "cancel": "Cancel",
+      "confirm": "Leave"
+    }
   },
   "studentsPage": {
     "title": "Student Management",

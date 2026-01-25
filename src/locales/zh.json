@@ -1059,7 +1059,16 @@
     "exportReport": "导出报表",
     "exporting": "导出中...",
     "exportSuccess": "报表导出成功",
-    "exportFailed": "导出失败"
+    "exportFailed": "导出失败",
+    "leave": "退出班级",
+    "leaveSuccess": "已退出班级",
+    "leaveFailed": "退出失败",
+    "leaveConfirm": {
+      "title": "确认退出班级？",
+      "description": "确定要退出班级「{{name}}」吗？退出后需要重新获取邀请码才能加入。",
+      "cancel": "取消",
+      "confirm": "退出"
+    }
   },
   "studentsPage": {
     "title": "学生管理",

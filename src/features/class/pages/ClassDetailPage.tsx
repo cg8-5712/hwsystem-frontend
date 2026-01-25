@@ -5,6 +5,7 @@ import {
   FiCopy,
   FiDownload,
   FiEdit2,
+  FiLogOut,
   FiTrash2,
   FiUsers,
 } from "react-icons/fi";
@@ -33,7 +34,7 @@ import { usePermission } from "@/features/auth/hooks/usePermission";
 import { HomeworkListCard } from "@/features/homework/components";
 import { notify } from "@/stores/useNotificationStore";
 import { useCurrentUser } from "@/stores/useUserStore";
-import { useClass, useDeleteClass } from "../hooks/useClass";
+import { useClass, useDeleteClass, useLeaveClass } from "../hooks/useClass";
 import { useRoutePrefix } from "../hooks/useClassBasePath";
 import { classService } from "../services/classService";
 
@@ -52,8 +53,11 @@ export function ClassDetailPage() {
     error: classError,
   } = useClass(classId!);
   const deleteClass = useDeleteClass();
+  const leaveClass = useLeaveClass();
 
   const isTeacher = classData?.teacher?.id === user?.id || canManageClass;
+  // 是否为班级成员（非教师）
+  const isMember = !isTeacher && classData?.my_role;
   // 课代表或教师可以导出报表
   const canExport = isTeacher || classData?.my_role === "class_representative";
 
@@ -84,6 +88,17 @@ export function ClassDetailPage() {
       navigate(`${prefix}/classes`);
     } catch {
       notify.error(t("notify.class.deleteFailed"));
+    }
+  };
+
+  const handleLeaveClass = async () => {
+    if (!user?.id || !classId) return;
+    try {
+      await leaveClass.mutateAsync({ classId, userId: user.id });
+      notify.success(t("classPage.leaveSuccess"));
+      navigate(`${prefix}/classes`);
+    } catch {
+      notify.error(t("classPage.leaveFailed"));
     }
   };
 
@@ -189,6 +204,40 @@ export function ClassDetailPage() {
                 </AlertDialogContent>
               </AlertDialog>
             </>
+          )}
+          {/* 非教师成员可退出班级 */}
+          {isMember && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline">
+                  <FiLogOut className="mr-2 h-4 w-4" />
+                  {t("classPage.leave")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {t("classPage.leaveConfirm.title")}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("classPage.leaveConfirm.description", {
+                      name: classData?.name,
+                    })}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>
+                    {t("classPage.leaveConfirm.cancel")}
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleLeaveClass}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {t("classPage.leaveConfirm.confirm")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       </div>
