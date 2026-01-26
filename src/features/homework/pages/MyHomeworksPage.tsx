@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClassList } from "@/features/class/hooks/useClass";
 import { useRoutePrefix } from "@/features/class/hooks/useClassBasePath";
 import {
-  useAllClassesHomeworks,
+  useAllHomeworks,
   useMyHomeworkStats,
 } from "@/features/homework/hooks/useHomework";
 import type { HomeworkListItemStringified } from "@/features/homework/services/homeworkService";
@@ -34,10 +34,10 @@ export function MyHomeworksPage() {
   // 使用后端 API 获取准确的统计数据
   const { data: statsData, isLoading: statsLoading } = useMyHomeworkStats();
 
-  // 获取所有班级的作业（用于显示列表）
-  const classIds = useMemo(() => classes.map((c) => String(c.id)), [classes]);
-  const { data: allHomeworks, isLoading: homeworksLoading } =
-    useAllClassesHomeworks(classIds);
+  // 获取所有班级的作业（使用单个 API 请求）
+  const { data: allHomeworksResponse, isLoading: homeworksLoading } =
+    useAllHomeworks();
+  const allHomeworks = allHomeworksResponse?.items ?? [];
 
   // 分类作业（用于显示列表）
   const categorizedHomeworks = useMemo(() => {
