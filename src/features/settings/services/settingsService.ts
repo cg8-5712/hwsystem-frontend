@@ -1,4 +1,5 @@
 import api from "@/lib/api";
+import type { Stringify } from "@/types";
 import type { ApiResponse, User } from "@/types/generated";
 
 export interface UpdateProfileRequest {
@@ -13,8 +14,8 @@ interface UserResponse {
 }
 
 export const settingsService = {
-  async updateProfile(data: UpdateProfileRequest): Promise<User> {
+  async updateProfile(data: UpdateProfileRequest): Promise<Stringify<User>> {
     const response = await api.put<ApiResponse<UserResponse>>("/auth/me", data);
-    return response.data.data!.user;
+    return response.data.data!.user as unknown as Stringify<User>;
   },
 };

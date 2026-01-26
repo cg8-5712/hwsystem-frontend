@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -36,7 +35,6 @@ import {
 export function AppHeader() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isAuthenticated = useIsAuthenticated();
@@ -49,7 +47,7 @@ export function AppHeader() {
   const { theme, setTheme, isDark } = useDarkMode();
 
   const handleLogout = () => {
-    logout(queryClient);
+    logout();
     navigate("/");
   };
 

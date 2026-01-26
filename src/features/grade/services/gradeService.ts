@@ -13,14 +13,6 @@ export type CreateGradeInput = Omit<CreateGradeRequest, "submission_id">;
 export type GradeDetail = Stringify<GradeResponse>;
 
 export const gradeService = {
-  // 获取评分
-  get: async (submissionId: string) => {
-    const { data } = await api.get<{ data: GradeDetail }>(
-      `/submissions/${submissionId}/grade`,
-    );
-    return data.data;
-  },
-
   // 创建评分
   create: async (submissionId: string, req: CreateGradeInput) => {
     const { data } = await api.post<{ data: GradeDetail }>("/grades", {

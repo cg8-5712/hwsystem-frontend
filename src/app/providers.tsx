@@ -1,4 +1,8 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import { Toaster } from "@/components/ui/sonner";
@@ -26,6 +30,33 @@ function AuthInitializer({ children }: { children: ReactNode }) {
   }, [initAuth, initDarkMode]);
 
   return <>{children}</>;
+}
+
+/**
+ * 监听用户变化，自动清空 React Query 缓存
+ * 解决切换账号后看到旧用户数据的问题
+ */
+function CacheManager() {
+  const currentUser = useUserStore((s) => s.currentUser);
+  const queryClient = useQueryClient();
+  const prevUserIdRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    const currentUserId = currentUser?.id;
+
+    // 用户切换（包括登出后登录新账号）时清除缓存
+    // 注意：首次加载时 prevUserIdRef.current 是 undefined，不触发清缓存
+    if (
+      prevUserIdRef.current !== undefined &&
+      prevUserIdRef.current !== currentUserId
+    ) {
+      queryClient.clear();
+    }
+
+    prevUserIdRef.current = currentUserId;
+  }, [currentUser?.id, queryClient]);
+
+  return null;
 }
 
 /**
@@ -87,6 +118,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthInitializer>
+        <CacheManager />
         <TokenRefresher />
         {children}
         <Toaster richColors position="top-right" />

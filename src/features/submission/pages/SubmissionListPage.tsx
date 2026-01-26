@@ -7,8 +7,8 @@ import {
   FiClock,
   FiEdit3,
   FiFileText,
-  FiUserX,
   FiPlayCircle,
+  FiUserX,
 } from "react-icons/fi";
 import { Link, useNavigate, useParams } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -215,7 +215,9 @@ export function SubmissionListPage() {
               {/* 开始批改工作流按钮 */}
               {canGrade && pending.length > 0 && (
                 <Button
-                  onClick={() => navigateToGrade(pending[0].latest_submission.id)}
+                  onClick={() =>
+                    navigateToGrade(String(pending[0].latest_submission.id))
+                  }
                   className="gap-2"
                 >
                   <FiPlayCircle className="h-4 w-4" />

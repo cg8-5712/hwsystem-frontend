@@ -50,7 +50,7 @@ export function useHomeworkList(
 ) {
   const currentUser = useCurrentUser();
   const userId = currentUser?.id;
-  
+
   return useQuery({
     queryKey: [...homeworkKeys.list(classId, params), userId] as const,
     queryFn: () => homeworkService.list(classId, params),
@@ -61,7 +61,7 @@ export function useHomeworkList(
 export function useHomework(homeworkId: string) {
   const currentUser = useCurrentUser();
   const userId = currentUser?.id;
-  
+
   return useQuery({
     queryKey: [...homeworkKeys.detail(homeworkId), userId] as const,
     queryFn: () => homeworkService.get(homeworkId),
@@ -128,7 +128,7 @@ export function useAllClassesHomeworks(
 ) {
   const currentUser = useCurrentUser();
   const userId = currentUser?.id;
-  
+
   return useQueries({
     queries: classIds.map((classId) => ({
       queryKey: [

@@ -5,8 +5,6 @@ import { useTranslation } from "react-i18next";
 import { FiArrowLeft } from "react-icons/fi";
 import { Link, useNavigate } from "react-router";
 import { z } from "zod";
-import { useUserList } from "@/features/admin/hooks/useUsers";
-import { usePermission } from "@/features/auth/hooks/usePermission";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,6 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useUserList } from "@/features/admin/hooks/useUsers";
+import { usePermission } from "@/features/auth/hooks/usePermission";
 import { notify } from "@/stores/useNotificationStore";
 import { useCurrentUser } from "@/stores/useUserStore";
 import { useCreateClass } from "../hooks/useClass";

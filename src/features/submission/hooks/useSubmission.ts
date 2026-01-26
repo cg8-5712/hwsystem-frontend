@@ -28,8 +28,10 @@ export const submissionKeys = {
   myLatest: (homeworkId: string) =>
     [...submissionKeys.all, "my", homeworkId, "latest"] as const,
   // 新增：提交概览
-  summary: (homeworkId: string, params?: { page?: number; size?: number }) =>
-    [...submissionKeys.all, "summary", homeworkId, params] as const,
+  summary: (
+    homeworkId: string,
+    params?: { page?: number; size?: number; graded?: boolean },
+  ) => [...submissionKeys.all, "summary", homeworkId, params] as const,
   // 新增：某学生的提交历史（教师视角）
   userSubmissions: (homeworkId: string, userId: string) =>
     [...submissionKeys.all, "user", homeworkId, userId] as const,
@@ -63,7 +65,7 @@ export function useSubmission(submissionId: string) {
 export function useMySubmissions(homeworkId: string) {
   const currentUser = useCurrentUser();
   const userId = currentUser?.id;
-  
+
   return useQuery({
     queryKey: [...submissionKeys.my(homeworkId), userId] as const,
     queryFn: () => submissionService.getMy(homeworkId),
@@ -74,7 +76,7 @@ export function useMySubmissions(homeworkId: string) {
 export function useMyLatestSubmission(homeworkId: string) {
   const currentUser = useCurrentUser();
   const userId = currentUser?.id;
-  
+
   return useQuery({
     queryKey: [...submissionKeys.myLatest(homeworkId), userId] as const,
     queryFn: async () => {
@@ -100,12 +102,14 @@ export function useMyLatestSubmission(homeworkId: string) {
 // 新增：获取提交概览（按学生聚合，教师视图）
 export function useSubmissionSummary(
   homeworkId: string,
-  params?: { page?: number; size?: number },
+  params?: { page?: number; size?: number; graded?: boolean },
 ) {
   return useQuery({
     queryKey: submissionKeys.summary(homeworkId, params),
     queryFn: () => submissionService.getSummary(homeworkId, params),
     enabled: !!homeworkId,
+    staleTime: 30 * 1000, // 30秒过期
+    refetchOnMount: "always", // 每次挂载都刷新
   });
 }
 
@@ -120,6 +124,8 @@ export function useUserSubmissionsForTeacher(
     queryFn: () =>
       submissionService.getUserSubmissionsForTeacher(homeworkId, userId),
     enabled: !!homeworkId && !!userId && enabled,
+    staleTime: 30 * 1000, // 30秒过期
+    refetchOnMount: "always", // 每次挂载都刷新
   });
 }
 

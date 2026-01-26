@@ -118,6 +118,7 @@ export const submissionService = {
     params?: {
       page?: number;
       size?: number;
+      graded?: boolean;
     },
   ) => {
     const { data } = await api.get<{
@@ -126,6 +127,7 @@ export const submissionService = {
       params: {
         page: params?.page,
         size: params?.size,
+        graded: params?.graded,
       },
     });
     return data.data;

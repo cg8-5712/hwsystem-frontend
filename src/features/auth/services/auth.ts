@@ -1,4 +1,5 @@
 import api from "@/lib/api";
+import type { Stringify } from "@/types";
 import type {
   ApiResponse,
   LoginRequest,
@@ -13,17 +14,17 @@ interface VerifyResult {
 }
 
 export const authService = {
-  async login(credentials: LoginRequest): Promise<LoginResponse> {
+  async login(credentials: LoginRequest): Promise<Stringify<LoginResponse>> {
     const response = await api.post<ApiResponse<LoginResponse>>(
       "/auth/login",
       credentials,
     );
-    return response.data.data!;
+    return response.data.data! as unknown as Stringify<LoginResponse>;
   },
 
   async register(data: { username: string; email: string; password: string }) {
     const response = await api.post<ApiResponse<User>>("/auth/register", data);
-    return response.data.data!;
+    return response.data.data! as unknown as Stringify<User>;
   },
 
   async verifyToken(): Promise<VerifyResult> {
@@ -48,9 +49,9 @@ export const authService = {
     }
   },
 
-  async getCurrentUser(): Promise<User> {
+  async getCurrentUser(): Promise<Stringify<User>> {
     const response = await api.get<ApiResponse<User>>("/auth/me");
-    return response.data.data!;
+    return response.data.data! as unknown as Stringify<User>;
   },
 
   async refreshToken(): Promise<{ access_token: string; expires_in: number }> {

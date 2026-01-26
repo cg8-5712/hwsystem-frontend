@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   FiBell,
@@ -56,7 +55,6 @@ export function DashboardLayout({ navItems, titleKey }: DashboardLayoutProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const queryClient = useQueryClient();
 
   useAuthEventListener();
 
@@ -66,7 +64,7 @@ export function DashboardLayout({ navItems, titleKey }: DashboardLayoutProps) {
   const roleText = useRoleText();
 
   const handleLogout = () => {
-    logout(queryClient);
+    logout();
     navigate("/");
   };
 

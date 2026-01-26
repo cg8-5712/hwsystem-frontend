@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { QueryClient } from "@tanstack/react-query";
 import i18n from "@/app/i18n";
 import { authService } from "@/features/auth/services/auth";
+import type { Stringify } from "@/types";
 import type { LoginRequest, User } from "@/types/generated";
 import { useNotificationStore } from "./useNotificationStore";
 
@@ -11,15 +11,15 @@ let initPromise: Promise<void> | null = null;
 
 interface UserState {
   // 状态
-  currentUser: User | null;
+  currentUser: Stringify<User> | null;
   isLoading: boolean;
   isInitialized: boolean;
 
   // Actions
-  login: (credentials: LoginRequest) => Promise<User>;
-  logout: (queryClient?: QueryClient) => void;
+  login: (credentials: LoginRequest) => Promise<Stringify<User>>;
+  logout: () => void;
   initAuth: () => Promise<void>;
-  refreshUserInfo: () => Promise<User | null>;
+  refreshUserInfo: () => Promise<Stringify<User> | null>;
   clearAuthData: () => void;
 }
 
@@ -60,19 +60,15 @@ export const useUserStore = create<UserState>()(
         }
       },
 
-      logout: (queryClient?: QueryClient) => {
+      logout: () => {
         const userName =
           get().currentUser?.display_name ||
           get().currentUser?.username ||
           i18n.t("role.user");
 
         // 清除状态和存储
+        // 缓存清理由 CacheManager 自动处理
         get().clearAuthData();
-
-        // 清除所有 React Query 缓存（如果提供了 queryClient）
-        if (queryClient) {
-          queryClient.clear();
-        }
 
         // 显示通知
         useNotificationStore

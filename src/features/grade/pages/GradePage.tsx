@@ -4,11 +4,11 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
   FiArrowLeft,
+  FiCheck,
   FiChevronLeft,
   FiChevronRight,
   FiClock,
   FiList,
-  FiCheck,
 } from "react-icons/fi";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { z } from "zod";
@@ -46,8 +46,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRoutePrefix } from "@/features/class/hooks/useClassBasePath";
 import { useSubmission } from "@/features/submission/hooks/useSubmission";
 import type { GradeNavigationState } from "@/features/submission/pages/SubmissionListPage";
+import { submissionService } from "@/features/submission/services/submissionService";
 import { notify } from "@/stores/useNotificationStore";
-import { useCreateGrade, useGrade, useUpdateGrade } from "../hooks/useGrade";
+import { useCreateGrade, useUpdateGrade } from "../hooks/useGrade";
 
 // 快速评分预设
 const QUICK_SCORES = [
@@ -87,17 +88,17 @@ export function GradePage() {
   const { data: submission, isLoading: submissionLoading } = useSubmission(
     submissionId!,
   );
-  const { data: existingGrade, isLoading: gradeLoading } = useGrade(
-    submissionId!,
-  );
+
+  // 直接从 submission 获取评分信息，不再单独请求
+  const existingGrade = submission?.grade;
 
   // 优先使用导航状态的 homeworkId，否则从 submission 中获取
   const homeworkId =
     navState?.homeworkId || submission?.homework_id?.toString();
 
   const createGrade = useCreateGrade(submissionId!, homeworkId);
-  // useUpdateGrade 需要 gradeId，在有 existingGrade 时才能使用
-  const updateGrade = useUpdateGrade(existingGrade?.id || "", {
+  // useUpdateGrade 需要 gradeId，从 submission.grade 获取
+  const updateGrade = useUpdateGrade(existingGrade?.id?.toString() || "", {
     submissionId,
     homeworkId,
   });
@@ -130,7 +131,7 @@ export function GradePage() {
     const currentIndex = navState.pendingList.findIndex(
       (s) => String(s.id) === String(submissionId),
     );
-    
+
     if (currentIndex === -1) {
       return null;
     }
@@ -217,34 +218,80 @@ export function GradePage() {
         notify.success(t("grade.success.created"));
       }
 
-      // 批改完成后的行为
-      if (navigationInfo?.next) {
-        // 还有下一个，自动跳转
+      // 批改完成后的行为：通过 API 获取下一个待批改的提交
+      if (homeworkId) {
         setIsAutoJumping(true);
-        notify.success(t("grade.navigation.autoNext"));
-        setTimeout(() => {
-          goToNext();
-          setIsAutoJumping(false);
-        }, 800); // 给用户足够时间看到成功提示
-      } else if (navigationInfo && !navigationInfo.next) {
-        // 已完成所有
-        setIsAutoJumping(true);
-        notify.success(t("grade.navigation.allCompleted"));
-        setTimeout(() => {
-          goBackToList();
-        }, 1200);
+        try {
+          // 获取下一个待批改的提交
+          const nextPending = await submissionService.getSummary(homeworkId, {
+            graded: false,
+            size: 1,
+          });
+
+          if (nextPending.items.length > 0) {
+            const nextSubmission = nextPending.items[0];
+            // 跳过当前正在批改的提交（因为刚批改完，可能还没更新）
+            if (
+              String(nextSubmission.latest_submission.id) ===
+              String(submissionId)
+            ) {
+              // 如果返回的是当前提交，说明可能是缓存问题，再请求一次
+              const retryPending = await submissionService.getSummary(
+                homeworkId,
+                {
+                  graded: false,
+                  size: 2,
+                },
+              );
+              const filtered = retryPending.items.filter(
+                (item) =>
+                  String(item.latest_submission.id) !== String(submissionId),
+              );
+              if (filtered.length > 0) {
+                notify.success(t("grade.navigation.autoNext"));
+                setTimeout(() => {
+                  navigate(
+                    `${prefix}/submissions/${filtered[0].latest_submission.id}/grade`,
+                    {
+                      state: { homeworkId, classId: navState?.classId },
+                    },
+                  );
+                }, 800);
+              } else {
+                // 全部批改完成
+                notify.success(t("grade.navigation.allCompleted"));
+                setTimeout(() => goBackToList(), 1200);
+              }
+            } else {
+              notify.success(t("grade.navigation.autoNext"));
+              setTimeout(() => {
+                navigate(
+                  `${prefix}/submissions/${nextSubmission.latest_submission.id}/grade`,
+                  {
+                    state: { homeworkId, classId: navState?.classId },
+                  },
+                );
+              }, 800);
+            }
+          } else {
+            // 全部批改完成
+            notify.success(t("grade.navigation.allCompleted"));
+            setTimeout(() => goBackToList(), 1200);
+          }
+        } catch {
+          // 获取下一个失败，直接返回列表
+          setTimeout(() => goBackToList(), 500);
+        }
       } else {
-        // 没有导航状态，直接返回
-        setTimeout(() => {
-          navigate(-1);
-        }, 500);
+        // 没有 homeworkId，直接返回
+        setTimeout(() => navigate(-1), 500);
       }
     } catch {
       notify.error(t("grade.error.failed"), t("grade.error.retry"));
     }
   };
 
-  const isLoading = submissionLoading || gradeLoading;
+  const isLoading = submissionLoading;
   const isPending = createGrade.isPending || updateGrade.isPending;
 
   if (isLoading) {
@@ -277,8 +324,8 @@ export function GradePage() {
                 {navigationInfo.current} / {navigationInfo.total}
               </Badge>
             </div>
-            <Progress 
-              value={(navigationInfo.current / navigationInfo.total) * 100} 
+            <Progress
+              value={(navigationInfo.current / navigationInfo.total) * 100}
               className="h-2"
             />
           </div>
@@ -563,9 +610,11 @@ export function GradePage() {
                             : isEditing
                               ? t("grade.updateGrade")
                               : t("grade.submitGrade")}
-                        {navigationInfo?.next && !isPending && !isAutoJumping && (
-                          <FiChevronRight className="ml-1 h-4 w-4" />
-                        )}
+                        {navigationInfo?.next &&
+                          !isPending &&
+                          !isAutoJumping && (
+                            <FiChevronRight className="ml-1 h-4 w-4" />
+                          )}
                       </Button>
                     </div>
                   </div>

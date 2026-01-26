@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -86,7 +85,6 @@ export function DashboardHeader() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const currentUser = useCurrentUser();
   const logout = useUserStore((s) => s.logout);
@@ -103,7 +101,7 @@ export function DashboardHeader() {
   );
 
   const handleLogout = () => {
-    logout(queryClient);
+    logout();
     navigate("/");
   };
 

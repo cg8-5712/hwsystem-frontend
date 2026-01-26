@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { homeworkKeys } from "@/features/homework/hooks/useHomework";
 import { submissionKeys } from "@/features/submission/hooks/useSubmission";
 import type { UpdateGradeRequest } from "@/types/generated";
@@ -9,30 +9,6 @@ export const gradeKeys = {
   all: ["grades"] as const,
   detail: (submissionId: string) => [...gradeKeys.all, submissionId] as const,
 };
-
-// Queries
-export function useGrade(submissionId: string) {
-  return useQuery({
-    queryKey: gradeKeys.detail(submissionId),
-    queryFn: async () => {
-      try {
-        return await gradeService.get(submissionId);
-      } catch (error: unknown) {
-        // 404 表示该提交尚未评分，返回 undefined 而不是抛错
-        if (
-          error &&
-          typeof error === "object" &&
-          "code" in error &&
-          (error.code === 404 || Number(error.code) === 404)
-        ) {
-          return undefined;
-        }
-        throw error;
-      }
-    },
-    enabled: !!submissionId,
-  });
-}
 
 // Mutations
 export function useCreateGrade(submissionId: string, homeworkId?: string) {

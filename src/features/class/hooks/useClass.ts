@@ -28,7 +28,7 @@ export function useClassList(params?: {
 }) {
   const currentUser = useCurrentUser();
   const userId = currentUser?.id;
-  
+
   return useQuery({
     queryKey: [...classKeys.list(params), userId] as const,
     queryFn: () => classService.list(params),
@@ -39,7 +39,7 @@ export function useClassList(params?: {
 export function useClass(classId: string) {
   const currentUser = useCurrentUser();
   const userId = currentUser?.id;
-  
+
   return useQuery({
     queryKey: [...classKeys.detail(classId), userId] as const,
     queryFn: () => classService.get(classId),

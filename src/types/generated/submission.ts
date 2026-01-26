@@ -25,7 +25,7 @@ export type SubmissionCreator = { id: bigint, username: string, display_name: st
 /**
  * 提交中的评分信息
  */
-export type SubmissionGradeInfo = { score: number, comment: string | null, graded_at: string, };
+export type SubmissionGradeInfo = { id: bigint, score: number, comment: string | null, graded_at: string, };
 
 /**
  * 提交关联的作业信息
