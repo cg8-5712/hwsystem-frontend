@@ -12,8 +12,13 @@ import type {
   UserStatus,
 } from "@/types/generated";
 
-// 前端 API 参数格式
-export interface UserListParams {
+// API 响应类型 - 直接使用生成类型的 Stringify 版本
+export type UserDetail = Stringify<User>;
+export type UserListResponseStringified = Stringify<UserListResponse>;
+export type UserImportResponseStringified = Stringify<UserImportResponse>;
+
+// 前端友好的查询参数类型（使用 page_size 而非 size）
+export interface UserListParamsInput {
   page?: number;
   page_size?: number;
   role?: UserRole;
@@ -21,19 +26,16 @@ export interface UserListParams {
   search?: string;
 }
 
-// API 响应类型 - 直接使用生成类型的 Stringify 版本
-export type UserDetail = Stringify<User>;
-export type UserListResponseStringified = Stringify<UserListResponse>;
-export type UserImportResponseStringified = Stringify<UserImportResponse>;
-
 export const userService = {
   list: async (
-    params: UserListParams = {},
+    params: UserListParamsInput = {},
   ): Promise<UserListResponseStringified> => {
+    // 转换 page_size 为 size
+    const { page_size, ...rest } = params;
     const { data } = await api.get<{ data: Stringify<UserListResponse> }>(
       "/users",
       {
-        params,
+        params: { ...rest, size: page_size },
       },
     );
     return data.data;

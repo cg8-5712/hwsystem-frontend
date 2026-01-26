@@ -845,11 +845,6 @@
     "positiveNumber": "请输入正数",
     "scoreRange": "分数必须在 0 到 {{max}} 之间"
   },
-  "avatar": {
-    "admin": "管",
-    "teacher": "师",
-    "user": "用"
-  },
   "admin": {
     "classes": {
       "title": "班级管理",

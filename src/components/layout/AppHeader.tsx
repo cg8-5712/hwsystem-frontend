@@ -28,7 +28,6 @@ import {
   useDashboardPath,
   useIsAuthenticated,
   useRoleText,
-  useUserAvatar,
   useUserStore,
 } from "@/stores/useUserStore";
 
@@ -42,7 +41,6 @@ export function AppHeader() {
   const logout = useUserStore((s) => s.logout);
   const dashboardPath = useDashboardPath();
   const roleText = useRoleText();
-  const avatar = useUserAvatar();
 
   const { theme, setTheme, isDark } = useDarkMode();
 
@@ -166,7 +164,9 @@ export function AppHeader() {
                           src={currentUser?.avatar_url || undefined}
                         />
                         <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                          {avatar}
+                          {(currentUser?.display_name ||
+                            currentUser?.username ||
+                            "?")[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                     </Button>

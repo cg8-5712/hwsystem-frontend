@@ -29,7 +29,7 @@ export function UserDashboardPage() {
   const { data: unreadData } = useUnreadCount();
 
   const classes = classData?.items ?? [];
-  const unreadCount = unreadData?.unread_count ?? 0;
+  const unreadCount = Number(unreadData?.unread_count ?? 0);
 
   // 获取所有班级的作业
   const classIds = useMemo(() => classes.map((c) => String(c.id)), [classes]);

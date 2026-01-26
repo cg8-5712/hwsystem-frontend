@@ -33,7 +33,6 @@ import { useDarkMode } from "@/hooks/useDarkMode";
 import {
   useCurrentUser,
   useRoleText,
-  useUserAvatar,
   useUserStore,
 } from "@/stores/useUserStore";
 
@@ -88,12 +87,11 @@ export function DashboardHeader() {
 
   const currentUser = useCurrentUser();
   const logout = useUserStore((s) => s.logout);
-  const avatar = useUserAvatar();
   const roleText = useRoleText();
 
   const { theme, setTheme, isDark } = useDarkMode();
   const { data: unreadData } = useUnreadCount();
-  const unreadCount = unreadData?.unread_count ?? 0;
+  const unreadCount = Number(unreadData?.unread_count ?? 0);
 
   const breadcrumbs = useMemo(
     () => generateBreadcrumbs(location.pathname),
@@ -206,7 +204,9 @@ export function DashboardHeader() {
               <Avatar>
                 <AvatarImage src={currentUser?.avatar_url || undefined} />
                 <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                  {avatar}
+                  {(currentUser?.display_name ||
+                    currentUser?.username ||
+                    "?")[0].toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </Button>

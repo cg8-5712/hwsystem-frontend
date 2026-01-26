@@ -1,20 +1,17 @@
 import api from "@/lib/api";
 import type { Stringify } from "@/types";
-import type { ApiResponse, User } from "@/types/generated";
+import type {
+  ApiResponse,
+  UpdateProfileRequest,
+  User,
+  UserResponse,
+} from "@/types/generated";
 
-export interface UpdateProfileRequest {
-  display_name?: string | null;
-  email?: string | null;
-  password?: string | null;
-  avatar_url?: string | null;
-}
-
-interface UserResponse {
-  user: User;
-}
+// 前端友好的输入类型（所有字段可选）
+export type UpdateProfileInput = Partial<Stringify<UpdateProfileRequest>>;
 
 export const settingsService = {
-  async updateProfile(data: UpdateProfileRequest): Promise<Stringify<User>> {
+  async updateProfile(data: UpdateProfileInput): Promise<Stringify<User>> {
     const response = await api.put<ApiResponse<UserResponse>>("/auth/me", data);
     return response.data.data!.user as unknown as Stringify<User>;
   },

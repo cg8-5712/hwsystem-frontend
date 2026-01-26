@@ -11,7 +11,7 @@ import {
   type UserDetail,
   type UserExportParams,
   type UserImportResponseStringified,
-  type UserListParams,
+  type UserListParamsInput,
   userService,
 } from "../services/userService";
 
@@ -19,13 +19,13 @@ import {
 export const userKeys = {
   all: ["users"] as const,
   lists: () => [...userKeys.all, "list"] as const,
-  list: (params: UserListParams) => [...userKeys.lists(), params] as const,
+  list: (params: UserListParamsInput) => [...userKeys.lists(), params] as const,
   details: () => [...userKeys.all, "detail"] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
 };
 
 // 获取用户列表
-export function useUserList(params: UserListParams = {}) {
+export function useUserList(params: UserListParamsInput = {}) {
   return useQuery({
     queryKey: userKeys.list(params),
     queryFn: () => userService.list(params),

@@ -102,7 +102,12 @@ export function SettingsPage() {
   const onSubmit = async (values: FormValues) => {
     try {
       // 只发送有变化的字段
-      const updateData: Record<string, string | null> = {};
+      const updateData: {
+        display_name?: string | null;
+        email?: string | null;
+        password?: string | null;
+        avatar_url?: string | null;
+      } = {};
 
       if (values.display_name !== (user?.display_name || "")) {
         updateData.display_name = values.display_name || null;

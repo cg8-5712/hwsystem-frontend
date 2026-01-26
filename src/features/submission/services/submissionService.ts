@@ -15,13 +15,21 @@ export type SubmissionCreateInput = Omit<
   "homework_id"
 >;
 
+// 前端友好的查询参数类型
+export interface SubmissionSummaryQueryInput {
+  page?: number;
+  size?: number;
+  graded?: boolean;
+}
+
 // API 响应类型 - 直接使用生成类型的 Stringify 版本
 export type SubmissionDetail = Stringify<SubmissionResponse>;
 export type SubmissionListItemStringified = Stringify<SubmissionListItem>;
 export type SubmissionSummaryItemStringified = Stringify<SubmissionSummaryItem>;
 
-// 提交详情扩展字段（后端在详情响应中附加）
-interface SubmissionDetailExtension {
+// 扩展类型：用于需要 version/is_late/homework 字段的详情响应
+// SubmissionResponse 本身不含这些字段，但 API 返回的完整提交详情包含
+export type SubmissionDetailWithHistory = SubmissionDetail & {
   version: number;
   is_late: boolean;
   // 评分页面需要的作业信息
@@ -31,12 +39,7 @@ interface SubmissionDetailExtension {
     max_score: number;
     deadline?: string | null;
   };
-}
-
-// 扩展类型：用于需要 version/is_late/homework 字段的详情响应
-// SubmissionResponse 本身不含这些字段，但 API 返回的完整提交详情包含
-export type SubmissionDetailWithHistory = SubmissionDetail &
-  SubmissionDetailExtension;
+};
 
 export interface SubmissionListResponseStringified {
   items: SubmissionListItemStringified[];
@@ -115,20 +118,12 @@ export const submissionService = {
   // 获取提交概览（按学生聚合，教师视图）
   getSummary: async (
     homeworkId: string,
-    params?: {
-      page?: number;
-      size?: number;
-      graded?: boolean;
-    },
+    params?: SubmissionSummaryQueryInput,
   ) => {
     const { data } = await api.get<{
       data: SubmissionSummaryResponseStringified;
     }>(`/homeworks/${homeworkId}/submissions/summary`, {
-      params: {
-        page: params?.page,
-        size: params?.size,
-        graded: params?.graded,
-      },
+      params,
     });
     return data.data;
   },

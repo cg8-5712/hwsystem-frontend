@@ -22,6 +22,11 @@ export type SettingAudit = { id: bigint, setting_key: string, old_value: string 
 export type SettingAuditListResponse = { audits: Array<SettingAudit>, pagination: PaginationInfo, };
 
 /**
+ * 审计日志查询参数
+ */
+export type SettingAuditQuery = { key: string | null, page: bigint | null, size: bigint | null, };
+
+/**
  * 单个配置响应
  */
 export type SettingResponse = { setting: SystemSetting, };

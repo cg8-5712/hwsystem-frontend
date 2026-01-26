@@ -38,4 +38,4 @@ export type ReferenceType = "homework" | "submission" | "grade" | "class";
 /**
  * 未读通知数量响应
  */
-export type UnreadCountResponse = { count: bigint, };
+export type UnreadCountResponse = { unread_count: bigint, };

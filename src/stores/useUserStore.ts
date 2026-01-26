@@ -175,20 +175,6 @@ export const useRoleText = () => {
   }
 };
 
-export const useUserAvatar = () => {
-  const role = useUserStore((s) => s.currentUser?.role);
-  switch (role) {
-    case "admin":
-      return i18n.t("avatar.admin");
-    case "teacher":
-      return i18n.t("avatar.teacher");
-    case "user":
-      return i18n.t("avatar.user");
-    default:
-      return i18n.t("avatar.user");
-  }
-};
-
 export const useUserAvatarColor = () => {
   const role = useUserStore((s) => s.currentUser?.role);
   switch (role) {

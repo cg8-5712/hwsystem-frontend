@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { UpdateSettingRequest } from "@/types/generated";
 import {
   type AdminSettings,
-  type SettingAuditQuery,
+  type SettingAuditQueryInput,
   type SettingAudits,
   type SystemSettings,
   systemService,
-  type UpdateSettingRequest,
 } from "../services/systemService";
 
 // Query key factory
@@ -13,7 +13,7 @@ export const systemKeys = {
   all: ["system"] as const,
   settings: () => [...systemKeys.all, "settings"] as const,
   adminSettings: () => [...systemKeys.all, "admin-settings"] as const,
-  audits: (query?: SettingAuditQuery) =>
+  audits: (query?: SettingAuditQueryInput) =>
     [...systemKeys.all, "audits", query] as const,
 };
 
@@ -56,7 +56,7 @@ export function useUpdateSetting() {
 }
 
 // 获取审计日志
-export function useSettingAudits(query: SettingAuditQuery = {}) {
+export function useSettingAudits(query: SettingAuditQueryInput = {}) {
   return useQuery({
     queryKey: systemKeys.audits(query),
     queryFn: () => systemService.getSettingAudits(query),

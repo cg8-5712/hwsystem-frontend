@@ -1,12 +1,14 @@
 import api from "@/lib/api";
 import type { Stringify } from "@/types";
 import type {
+  CreateHomeworkRequest,
   Homework,
   HomeworkCreator,
   HomeworkDetail,
   HomeworkListResponse,
   HomeworkStatsResponse,
   HomeworkStatsSummary,
+  MySubmissionSummary,
   ScoreRange,
   ScoreStats,
   UnsubmittedStudent,
@@ -14,26 +16,16 @@ import type {
 } from "@/types/generated";
 import type { FileInfo } from "@/types/generated/file";
 
-// 前端友好的输入类型（用于创建/更新）
-export interface CreateHomeworkInput {
-  title: string;
-  description?: string | null;
-  max_score?: number | null;
-  deadline?: string | null;
-  allow_late?: boolean | null;
-  attachments?: string[] | null;
-}
+// 前端友好的输入类型（用于创建）- 从生成类型派生
+export type CreateHomeworkInput = Omit<
+  Stringify<CreateHomeworkRequest>,
+  "class_id"
+>;
 
 export type UpdateHomeworkInput = Partial<Stringify<UpdateHomeworkRequest>>;
 
-// API 响应中的我的提交摘要（学生视角）
-export interface HomeworkMySubmission {
-  id: string;
-  version: number;
-  status: "pending" | "graded" | "late";
-  is_late: boolean;
-  score?: number | null;
-}
+// API 响应中的我的提交摘要（学生视角）- 使用生成类型
+export type HomeworkMySubmission = Stringify<MySubmissionSummary>;
 
 // 附件信息类型（前端使用）- 直接使用生成类型
 export type HomeworkAttachment = Stringify<FileInfo>;

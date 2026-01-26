@@ -1,9 +1,11 @@
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FiArrowLeft,
   FiBarChart2,
   FiEdit2,
   FiPaperclip,
+  FiPlayCircle,
   FiTrash2,
   FiUpload,
 } from "react-icons/fi";
@@ -34,7 +36,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePermission } from "@/features/auth/hooks/usePermission";
 import { useClass } from "@/features/class/hooks/useClass";
 import { useRoutePrefix } from "@/features/class/hooks/useClassBasePath";
-import { useMyLatestSubmission } from "@/features/submission/hooks/useSubmission";
+import {
+  useMyLatestSubmission,
+  useSubmissionSummary,
+} from "@/features/submission/hooks/useSubmission";
+import type { GradeNavigationState } from "@/features/submission/pages/SubmissionListPage";
 import { notify } from "@/stores/useNotificationStore";
 import { useCurrentUser } from "@/stores/useUserStore";
 import { useDeleteHomework, useHomework } from "../hooks/useHomework";
@@ -67,10 +73,38 @@ export function HomeworkDetailPage() {
     classData?.my_role === "teacher";
   // 是否可以编辑/删除作业（仅教师和管理员）
   const canEditHomework = isTeacherView && hasTeacherPermission;
+  // 是否有评分权限（只有教师才能评分，课代表不能）
+  const canGrade = isTeacherView && classData?.my_role === "teacher";
+
+  // 获取提交概览（仅教师视图需要）
+  const { data: summaryData } = useSubmissionSummary(homeworkId!);
+
+  // 计算待批改的提交
+  const pendingSubmissions = useMemo(() => {
+    if (!canGrade) return [];
+    return (summaryData?.items ?? []).filter((item) => !item.grade);
+  }, [summaryData, canGrade]);
+
   const isDeadlinePassed = homework?.deadline
     ? new Date(homework.deadline) < new Date()
     : false;
   const canSubmit = !isDeadlinePassed || homework?.allow_late;
+
+  // 导航到批改页（带导航状态）
+  const navigateToGrade = (submissionId: string) => {
+    const navState: GradeNavigationState = {
+      pendingList: pendingSubmissions.map((s) => ({
+        id: String(s.latest_submission.id),
+        studentName: s.creator.display_name || s.creator.username,
+      })),
+      homeworkId: homeworkId!,
+      classId: classId!,
+    };
+
+    navigate(`${prefix}/submissions/${submissionId}/grade`, {
+      state: navState,
+    });
+  };
 
   const handleDelete = async () => {
     try {
@@ -372,6 +406,22 @@ export function HomeworkDetailPage() {
                 <CardTitle>{t("homeworkPage.submissionManagement")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                {canGrade && pendingSubmissions.length > 0 && (
+                  <Button
+                    className="w-full"
+                    onClick={() =>
+                      navigateToGrade(
+                        String(pendingSubmissions[0].latest_submission.id),
+                      )
+                    }
+                  >
+                    <FiPlayCircle className="mr-2 h-4 w-4" />
+                    {t("submission.list.startGrading")}
+                    <Badge variant="secondary" className="ml-2">
+                      {pendingSubmissions.length}
+                    </Badge>
+                  </Button>
+                )}
                 <Button variant="outline" className="w-full" asChild>
                   <Link
                     to={`${prefix}/classes/${classId}/homework/${homeworkId}/submissions`}

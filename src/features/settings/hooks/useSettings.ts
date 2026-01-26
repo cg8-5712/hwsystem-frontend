@@ -6,14 +6,14 @@ import { submissionKeys } from "@/features/submission/hooks/useSubmission";
 import { useUserStore } from "@/stores/useUserStore";
 import {
   settingsService,
-  type UpdateProfileRequest,
+  type UpdateProfileInput,
 } from "../services/settingsService";
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdateProfileRequest) =>
+    mutationFn: (data: UpdateProfileInput) =>
       settingsService.updateProfile(data),
     onSuccess: (user) => {
       // 更新全局用户状态

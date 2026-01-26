@@ -36,7 +36,6 @@ import { useAuthEventListener } from "@/hooks/useAuthEventListener";
 import {
   useCurrentUser,
   useRoleText,
-  useUserAvatar,
   useUserStore,
 } from "@/stores/useUserStore";
 
@@ -60,7 +59,6 @@ export function DashboardLayout({ navItems, titleKey }: DashboardLayoutProps) {
 
   const currentUser = useCurrentUser();
   const logout = useUserStore((s) => s.logout);
-  const avatar = useUserAvatar();
   const roleText = useRoleText();
 
   const handleLogout = () => {
@@ -114,7 +112,9 @@ export function DashboardLayout({ navItems, titleKey }: DashboardLayoutProps) {
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={currentUser?.avatar_url || undefined} />
                     <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                      {avatar}
+                      {(currentUser?.display_name ||
+                        currentUser?.username ||
+                        "?")[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start text-left">

@@ -5,6 +5,7 @@ import type {
   SettingAuditListResponse,
   SettingResponse,
   SystemSettingsResponse,
+  UpdateSettingRequest,
 } from "@/types/generated";
 
 // API 响应类型 - 直接使用生成类型的 Stringify 版本
@@ -12,11 +13,8 @@ export type SystemSettings = Stringify<SystemSettingsResponse>;
 export type AdminSettings = Stringify<AdminSettingsListResponse>;
 export type SettingAudits = Stringify<SettingAuditListResponse>;
 
-export interface UpdateSettingRequest {
-  value: string;
-}
-
-export interface SettingAuditQuery {
+// 前端友好的输入类型
+export interface SettingAuditQueryInput {
   key?: string;
   page?: number;
   size?: number;
@@ -54,7 +52,7 @@ export const systemService = {
 
   // 获取审计日志
   getSettingAudits: async (
-    query: SettingAuditQuery = {},
+    query: SettingAuditQueryInput = {},
   ): Promise<SettingAudits> => {
     const { data } = await api.get<{ data: SettingAuditListResponse }>(
       "/system/admin/settings/audit",

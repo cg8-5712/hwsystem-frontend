@@ -845,11 +845,6 @@
     "positiveNumber": "Please enter a positive number",
     "scoreRange": "Score must be between 0 and {{max}}"
   },
-  "avatar": {
-    "admin": "A",
-    "teacher": "T",
-    "user": "U"
-  },
   "admin": {
     "classes": {
       "title": "Class Management",

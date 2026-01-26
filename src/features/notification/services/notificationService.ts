@@ -4,6 +4,7 @@ import type {
   MarkAllReadResponse,
   Notification,
   NotificationListResponse,
+  UnreadCountResponse,
 } from "@/types/generated";
 
 // API 响应类型 - 直接使用生成类型的 Stringify 版本
@@ -30,12 +31,11 @@ export const notificationService = {
   },
 
   // 获取未读数量
-  getUnreadCount: async () => {
-    const { data } = await api.get<{ data: { count: number } }>(
+  getUnreadCount: async (): Promise<Stringify<UnreadCountResponse>> => {
+    const { data } = await api.get<{ data: UnreadCountResponse }>(
       "/notifications/unread-count",
     );
-    // 转换字段名以兼容前端使用
-    return { unread_count: data.data.count };
+    return data.data as unknown as Stringify<UnreadCountResponse>;
   },
 
   // 标记为已读
