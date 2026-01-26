@@ -80,9 +80,23 @@ export function SubmissionListPage() {
   // 判断是否有评分权限（只有教师才能评分，课代表不能）
   const canGrade = classData?.my_role === "teacher";
 
+  // 获取全部提交概览（用于列表展示）
   const { data, isLoading, error } = useSubmissionSummary(homeworkId!);
+
+  // 获取待批改的提交（使用 graded=false 筛选，避免分页问题）
+  const { data: pendingData } = useSubmissionSummary(
+    homeworkId!,
+    canGrade ? { graded: false } : undefined,
+  );
+
   const { data: stats, isLoading: statsLoading } = useHomeworkStats(
     homeworkId!,
+  );
+
+  // 待批改列表和数量（从专门的查询获取）
+  const pendingSubmissions = pendingData?.items ?? [];
+  const pendingCount = Number(
+    pendingData?.pagination?.total ?? pendingSubmissions.length,
   );
 
   // 获取选中学生的提交历史
@@ -94,17 +108,13 @@ export function SubmissionListPage() {
     );
 
   // 计算已提交和未提交的学生
-  const { submitted, unsubmitted, pending } = useMemo(() => {
+  const { submitted, unsubmitted } = useMemo(() => {
     const submittedItems = data?.items ?? [];
     const unsubmittedItems = stats?.unsubmitted_students ?? [];
-
-    // 待批改的学生（已提交但未评分）
-    const pendingItems = submittedItems.filter((item) => !item.grade);
 
     return {
       submitted: submittedItems,
       unsubmitted: unsubmittedItems,
-      pending: pendingItems,
     };
   }, [data, stats]);
 
@@ -125,7 +135,7 @@ export function SubmissionListPage() {
 
     // 构建待批改列表 - 只包含未评分的提交
     const navState: GradeNavigationState = {
-      pendingList: pending.map((s) => ({
+      pendingList: pendingSubmissions.map((s) => ({
         id: String(s.latest_submission.id),
         studentName: s.creator.display_name || s.creator.username,
       })),
@@ -213,17 +223,19 @@ export function SubmissionListPage() {
                 }) || `共 ${stats?.total_students ?? 0} 名学生`}
               </div>
               {/* 开始批改工作流按钮 */}
-              {canGrade && pending.length > 0 && (
+              {canGrade && pendingCount > 0 && (
                 <Button
                   onClick={() =>
-                    navigateToGrade(String(pending[0].latest_submission.id))
+                    navigateToGrade(
+                      String(pendingSubmissions[0].latest_submission.id),
+                    )
                   }
                   className="gap-2"
                 >
                   <FiPlayCircle className="h-4 w-4" />
                   {t("submission.list.startGrading")}
                   <Badge variant="secondary" className="ml-1">
-                    {pending.length}
+                    {pendingCount}
                   </Badge>
                 </Button>
               )}

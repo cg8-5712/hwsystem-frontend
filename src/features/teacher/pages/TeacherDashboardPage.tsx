@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClassList } from "@/features/class/hooks/useClass";
 import { useRoutePrefix } from "@/features/class/hooks/useClassBasePath";
-import { useAllClassesHomeworks } from "@/features/homework/hooks/useHomework";
+import { useTeacherHomeworkStats } from "@/features/homework/hooks/useHomework";
 import { useCurrentUser } from "@/stores/useUserStore";
 
 export function TeacherDashboardPage() {
@@ -24,28 +24,16 @@ export function TeacherDashboardPage() {
   const prefix = useRoutePrefix();
   const user = useCurrentUser();
   const { data: classData, isLoading } = useClassList();
+  const { data: statsData, isLoading: statsLoading } =
+    useTeacherHomeworkStats();
 
   const classes = classData?.items ?? [];
-  const classIds = classes.map((cls) => String(cls.id));
   const totalStudents = classes.reduce(
     (sum, cls) => sum + Number(cls.member_count ?? 0),
     0,
   );
 
-  const { data: allHomeworks } = useAllClassesHomeworks(classIds, {
-    include_stats: true,
-  });
-
-  const pendingReviewCount = allHomeworks.reduce((sum, hw) => {
-    if (hw.stats_summary) {
-      return (
-        sum +
-        Number(hw.stats_summary.submitted_count) -
-        Number(hw.stats_summary.graded_count)
-      );
-    }
-    return sum;
-  }, 0);
+  const pendingReviewCount = Number(statsData?.pending_review ?? 0);
 
   return (
     <div className="mx-auto max-w-7xl">
@@ -80,7 +68,7 @@ export function TeacherDashboardPage() {
         <StatCard
           icon={FiClipboard}
           labelKey="dashboard.teacher.stats.pendingSubmissions"
-          value={pendingReviewCount}
+          value={statsLoading ? "-" : pendingReviewCount}
           variant="purple"
           href={`${prefix}/homeworks`}
         />

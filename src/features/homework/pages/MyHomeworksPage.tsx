@@ -15,7 +15,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClassList } from "@/features/class/hooks/useClass";
 import { useRoutePrefix } from "@/features/class/hooks/useClassBasePath";
-import { useAllClassesHomeworks } from "@/features/homework/hooks/useHomework";
+import {
+  useAllClassesHomeworks,
+  useMyHomeworkStats,
+} from "@/features/homework/hooks/useHomework";
 import type { HomeworkListItemStringified } from "@/features/homework/services/homeworkService";
 
 type TabValue = "pending" | "submitted" | "graded";
@@ -28,12 +31,15 @@ export function MyHomeworksPage() {
   const { data: classData, isLoading: classLoading } = useClassList();
   const classes = classData?.items ?? [];
 
-  // 获取所有班级的作业
+  // 使用后端 API 获取准确的统计数据
+  const { data: statsData, isLoading: statsLoading } = useMyHomeworkStats();
+
+  // 获取所有班级的作业（用于显示列表）
   const classIds = useMemo(() => classes.map((c) => String(c.id)), [classes]);
   const { data: allHomeworks, isLoading: homeworksLoading } =
     useAllClassesHomeworks(classIds);
 
-  // 分类作业
+  // 分类作业（用于显示列表）
   const categorizedHomeworks = useMemo(() => {
     const pending = allHomeworks.filter((hw) => !hw.my_submission);
     const submitted = allHomeworks.filter(
@@ -257,27 +263,27 @@ export function MyHomeworksPage() {
           <TabsTrigger value="pending" className="gap-2">
             <FiClock className="h-4 w-4" />
             <span>{t("homework.tabs.pending")}</span>
-            {!isLoading && categorizedHomeworks.pending.length > 0 && (
+            {!statsLoading && Number(statsData?.pending ?? 0) > 0 && (
               <Badge variant="secondary" className="ml-1">
-                {categorizedHomeworks.pending.length}
+                {statsData?.pending}
               </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="submitted" className="gap-2">
             <FiFileText className="h-4 w-4" />
             <span>{t("homework.tabs.submitted")}</span>
-            {!isLoading && categorizedHomeworks.submitted.length > 0 && (
+            {!statsLoading && Number(statsData?.submitted ?? 0) > 0 && (
               <Badge variant="secondary" className="ml-1">
-                {categorizedHomeworks.submitted.length}
+                {statsData?.submitted}
               </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="graded" className="gap-2">
             <FiCheckCircle className="h-4 w-4" />
             <span>{t("homework.tabs.graded")}</span>
-            {!isLoading && categorizedHomeworks.graded.length > 0 && (
+            {!statsLoading && Number(statsData?.graded ?? 0) > 0 && (
               <Badge variant="secondary" className="ml-1">
-                {categorizedHomeworks.graded.length}
+                {statsData?.graded}
               </Badge>
             )}
           </TabsTrigger>

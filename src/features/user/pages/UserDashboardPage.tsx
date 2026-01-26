@@ -17,7 +17,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClassList } from "@/features/class/hooks/useClass";
 import { useRoutePrefix } from "@/features/class/hooks/useClassBasePath";
-import { useAllClassesHomeworks } from "@/features/homework/hooks/useHomework";
+import {
+  useAllClassesHomeworks,
+  useMyHomeworkStats,
+} from "@/features/homework/hooks/useHomework";
 import { useUnreadCount } from "@/features/notification/hooks/useNotification";
 import { useCurrentUser } from "@/stores/useUserStore";
 
@@ -27,42 +30,28 @@ export function UserDashboardPage() {
   const user = useCurrentUser();
   const { data: classData, isLoading: classLoading } = useClassList();
   const { data: unreadData } = useUnreadCount();
+  const { data: statsData, isLoading: statsLoading } = useMyHomeworkStats();
 
   const classes = classData?.items ?? [];
   const unreadCount = Number(unreadData?.unread_count ?? 0);
 
-  // 获取所有班级的作业
+  // 获取所有班级的作业（仅用于显示待完成列表）
   const classIds = useMemo(() => classes.map((c) => String(c.id)), [classes]);
   const { data: allHomeworks, isLoading: homeworksLoading } =
     useAllClassesHomeworks(classIds);
 
-  // 计算作业统计
-  const homeworkStats = useMemo(() => {
+  // 待完成作业列表（仅用于显示，不用于统计）
+  const upcomingHomeworks = useMemo(() => {
     const pending = allHomeworks.filter((hw) => !hw.my_submission);
-    const submitted = allHomeworks.filter(
-      (hw) =>
-        hw.my_submission &&
-        (hw.my_submission.status === "pending" ||
-          hw.my_submission.status === "late"),
-    );
-    const graded = allHomeworks.filter(
-      (hw) => hw.my_submission?.status === "graded",
-    );
-
-    // 待完成作业按截止日期排序（最近的在前，无截止日期的在最后）
-    const sortedPending = [...pending].sort((a, b) => {
-      if (!a.deadline && !b.deadline) return 0;
-      if (!a.deadline) return 1;
-      if (!b.deadline) return -1;
-      return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-    });
-
-    return {
-      pending: pending.length,
-      submitted: submitted.length,
-      graded: graded.length,
-      upcomingHomeworks: sortedPending.slice(0, 5),
-    };
+    // 按截止日期排序（最近的在前，无截止日期的在最后）
+    return [...pending]
+      .sort((a, b) => {
+        if (!a.deadline && !b.deadline) return 0;
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+      })
+      .slice(0, 5);
   }, [allHomeworks]);
 
   // 格式化截止日期
@@ -132,19 +121,19 @@ export function UserDashboardPage() {
         <StatCard
           icon={FiClock}
           labelKey="dashboard.user.stats.pendingHomeworks"
-          value={homeworksLoading ? "-" : homeworkStats.pending}
+          value={statsLoading ? "-" : Number(statsData?.pending ?? 0)}
           variant="orange"
         />
         <StatCard
           icon={FiFileText}
           labelKey="dashboard.user.stats.submittedHomeworks"
-          value={homeworksLoading ? "-" : homeworkStats.submitted}
+          value={statsLoading ? "-" : Number(statsData?.submitted ?? 0)}
           variant="purple"
         />
         <StatCard
           icon={FiCheckCircle}
           labelKey="dashboard.user.stats.gradedHomeworks"
-          value={homeworksLoading ? "-" : homeworkStats.graded}
+          value={statsLoading ? "-" : Number(statsData?.graded ?? 0)}
           variant="green"
         />
       </div>
@@ -168,7 +157,7 @@ export function UserDashboardPage() {
                   </div>
                 ))}
               </div>
-            ) : homeworkStats.upcomingHomeworks.length === 0 ? (
+            ) : upcomingHomeworks.length === 0 ? (
               <div className="p-12 text-center">
                 <FiCheck className="h-12 w-12 text-green-500/50 mx-auto mb-4" />
                 <p className="text-muted-foreground">
@@ -177,7 +166,7 @@ export function UserDashboardPage() {
               </div>
             ) : (
               <div className="divide-y">
-                {homeworkStats.upcomingHomeworks.map((hw) => (
+                {upcomingHomeworks.map((hw) => (
                   <Link
                     key={hw.id}
                     to={`${prefix}/classes/${hw.class_id}/homework/${hw.id}`}

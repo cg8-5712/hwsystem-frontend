@@ -34,6 +34,8 @@ export const homeworkKeys = {
     [...homeworkKeys.details(), homeworkId] as const,
   stats: (homeworkId: string) =>
     [...homeworkKeys.all, homeworkId, "stats"] as const,
+  myStats: () => [...homeworkKeys.all, "my-stats"] as const,
+  teacherStats: () => [...homeworkKeys.all, "teacher-stats"] as const,
 };
 
 // Queries
@@ -76,6 +78,24 @@ export function useHomeworkStats(homeworkId: string) {
     enabled: !!homeworkId,
     staleTime: 30 * 1000, // 30秒过期
     refetchOnMount: "always", // 总是在挂载时重新获取
+  });
+}
+
+// 学生作业统计（跨所有班级）
+export function useMyHomeworkStats() {
+  return useQuery({
+    queryKey: homeworkKeys.myStats(),
+    queryFn: () => homeworkService.getMyStats(),
+    staleTime: 60 * 1000, // 1分钟过期
+  });
+}
+
+// 教师作业统计（跨所有班级）
+export function useTeacherHomeworkStats() {
+  return useQuery({
+    queryKey: homeworkKeys.teacherStats(),
+    queryFn: () => homeworkService.getTeacherStats(),
+    staleTime: 60 * 1000, // 1分钟过期
   });
 }
 

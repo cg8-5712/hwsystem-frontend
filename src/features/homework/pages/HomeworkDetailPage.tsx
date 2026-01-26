@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FiArrowLeft,
@@ -76,14 +75,17 @@ export function HomeworkDetailPage() {
   // 是否有评分权限（只有教师才能评分，课代表不能）
   const canGrade = isTeacherView && classData?.my_role === "teacher";
 
-  // 获取提交概览（仅教师视图需要）
-  const { data: summaryData } = useSubmissionSummary(homeworkId!);
+  // 获取待批改的提交（使用 graded=false 筛选，避免分页问题）
+  const { data: pendingData } = useSubmissionSummary(
+    homeworkId!,
+    canGrade ? { graded: false } : undefined,
+  );
 
-  // 计算待批改的提交
-  const pendingSubmissions = useMemo(() => {
-    if (!canGrade) return [];
-    return (summaryData?.items ?? []).filter((item) => !item.grade);
-  }, [summaryData, canGrade]);
+  // 待批改列表和数量
+  const pendingSubmissions = pendingData?.items ?? [];
+  const pendingCount = Number(
+    pendingData?.pagination?.total ?? pendingSubmissions.length,
+  );
 
   const isDeadlinePassed = homework?.deadline
     ? new Date(homework.deadline) < new Date()
@@ -406,7 +408,7 @@ export function HomeworkDetailPage() {
                 <CardTitle>{t("homeworkPage.submissionManagement")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {canGrade && pendingSubmissions.length > 0 && (
+                {canGrade && pendingCount > 0 && (
                   <Button
                     className="w-full"
                     onClick={() =>
@@ -418,7 +420,7 @@ export function HomeworkDetailPage() {
                     <FiPlayCircle className="mr-2 h-4 w-4" />
                     {t("submission.list.startGrading")}
                     <Badge variant="secondary" className="ml-2">
-                      {pendingSubmissions.length}
+                      {pendingCount}
                     </Badge>
                   </Button>
                 )}

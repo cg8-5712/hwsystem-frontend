@@ -8,9 +8,11 @@ import type {
   HomeworkListResponse,
   HomeworkStatsResponse,
   HomeworkStatsSummary,
+  MyHomeworkStatsResponse,
   MySubmissionSummary,
   ScoreRange,
   ScoreStats,
+  TeacherHomeworkStatsResponse,
   UnsubmittedStudent,
   UpdateHomeworkRequest,
 } from "@/types/generated";
@@ -135,5 +137,21 @@ export const homeworkService = {
       responseType: "blob",
     });
     return response.data as Blob;
+  },
+
+  // 获取学生作业统计（跨所有班级）
+  getMyStats: async () => {
+    const { data } = await api.get<{ data: MyHomeworkStatsResponse }>(
+      "/homeworks/my/stats",
+    );
+    return data.data as unknown as Stringify<MyHomeworkStatsResponse>;
+  },
+
+  // 获取教师作业统计（跨所有班级）
+  getTeacherStats: async () => {
+    const { data } = await api.get<{ data: TeacherHomeworkStatsResponse }>(
+      "/homeworks/teacher/stats",
+    );
+    return data.data as unknown as Stringify<TeacherHomeworkStatsResponse>;
   },
 };

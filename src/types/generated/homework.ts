@@ -70,6 +70,27 @@ graded_count: bigint, };
 export type HomeworkWithCreator = { creator: HomeworkCreator | null, id: bigint, class_id: bigint, title: string, description: string | null, max_score: number, deadline: string | null, allow_late: boolean, created_by: bigint, created_at: string, updated_at: string, };
 
 /**
+ * 学生作业统计响应
+ */
+export type MyHomeworkStatsResponse = { 
+/**
+ * 待完成（未提交）
+ */
+pending: bigint, 
+/**
+ * 已提交待批改
+ */
+submitted: bigint, 
+/**
+ * 已批改
+ */
+graded: bigint, 
+/**
+ * 总数
+ */
+total: bigint, };
+
+/**
  * 我的提交摘要（用于作业列表显示提交状态）
  */
 export type MySubmissionSummary = { id: bigint, version: number, status: string, is_late: boolean, score: number | null, };
@@ -83,6 +104,27 @@ export type ScoreRange = { range: string, count: bigint, };
  * 分数统计
  */
 export type ScoreStats = { average: number, max: number, min: number, };
+
+/**
+ * 教师作业统计响应
+ */
+export type TeacherHomeworkStatsResponse = { 
+/**
+ * 作业总数
+ */
+total_homeworks: bigint, 
+/**
+ * 待批改提交数
+ */
+pending_review: bigint, 
+/**
+ * 总提交数
+ */
+total_submissions: bigint, 
+/**
+ * 已批改数
+ */
+graded_submissions: bigint, };
 
 /**
  * 未提交学生

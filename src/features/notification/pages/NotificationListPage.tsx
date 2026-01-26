@@ -28,6 +28,7 @@ import {
   useMarkAllAsRead,
   useMarkAsRead,
   useNotificationList,
+  useUnreadCount,
 } from "../hooks/useNotification";
 
 const notificationTypeIcons: Record<string, React.ElementType> = {
@@ -49,9 +50,13 @@ export function NotificationListPage() {
   const { data, isLoading, error } = useNotificationList({
     is_read: filter === "unread" ? false : filter === "read" ? true : undefined,
   });
+  const { data: unreadData } = useUnreadCount();
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
   const deleteNotification = useDeleteNotification();
+
+  // 使用后端 API 获取准确的未读数量
+  const unreadCount = Number(unreadData?.unread_count ?? 0);
 
   const notificationTypeLabels: Record<NotificationType, string> = {
     homework_created: t("notification.type.homeworkCreated"),
@@ -136,8 +141,6 @@ export function NotificationListPage() {
       </div>
     );
   }
-
-  const unreadCount = data?.items.filter((n) => !n.is_read).length || 0;
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-8">
