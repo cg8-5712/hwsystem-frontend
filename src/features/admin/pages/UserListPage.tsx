@@ -1,11 +1,10 @@
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FiDownload,
   FiEdit2,
   FiEye,
   FiPlus,
-  FiSearch,
   FiTrash2,
   FiUpload,
   FiUserMinus,
@@ -25,16 +24,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -44,12 +35,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useBatchSelection } from "@/hooks/useBatchSelection";
 import { useDebouncedSearch } from "@/hooks/useDebouncedSearch";
 import { DEFAULT_PAGE_SIZE, TABLE_PAGE_SIZE_OPTIONS } from "@/lib/constants";
 import { logger } from "@/lib/logger";
 import { notify } from "@/stores/useNotificationStore";
 import { UserExportDialog } from "../components/UserExportDialog";
 import { UserImportDialog } from "../components/UserImportDialog";
+import { UserListFilters } from "../components/UserListFilters";
 import { type UserDetail, useDeleteUser, useUserList } from "../hooks/useUsers";
 import type { UserRole, UserStatus } from "../services/userService";
 
@@ -90,9 +83,6 @@ export default function UserListPage() {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
-  // 批量选择状态
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
   const { search, setSearch, debouncedSearch } = useDebouncedSearch({
     onSearchChange: () => setPage(1),
   });
@@ -107,38 +97,17 @@ export default function UserListPage() {
 
   const deleteUser = useDeleteUser();
 
-  // 批量选择相关函数
   const items = data?.items ?? [];
 
-  const isSelected = useCallback(
-    (id: string) => selectedIds.has(id),
-    [selectedIds],
-  );
-
-  const toggleSelection = useCallback((id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }, []);
-
-  const selectAll = useCallback(() => {
-    setSelectedIds(new Set(items.map((item) => item.id)));
-  }, [items]);
-
-  const clearSelection = useCallback(() => {
-    setSelectedIds(new Set());
-  }, []);
-
-  const isAllSelected = useMemo(
-    () => items.length > 0 && selectedIds.size === items.length,
-    [items.length, selectedIds.size],
-  );
+  // 使用通用批量选择 Hook
+  const {
+    selectedIds,
+    isSelected,
+    toggleSelection,
+    selectAll,
+    clearSelection,
+    isAllSelected,
+  } = useBatchSelection(items);
 
   // 批量删除
   const handleBatchDelete = async () => {
@@ -211,62 +180,15 @@ export default function UserListPage() {
       </div>
 
       {/* 筛选栏 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t("userList.filters")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={t("userList.searchPlaceholder")}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-
-            <Select
-              value={roleFilter}
-              onValueChange={(v) => {
-                setRoleFilter(v as UserRole | "all");
-                setPage(1);
-              }}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder={t("userForm.role")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("userList.allRoles")}</SelectItem>
-                <SelectItem value="admin">{t("role.admin")}</SelectItem>
-                <SelectItem value="teacher">{t("role.teacher")}</SelectItem>
-                <SelectItem value="user">{t("role.student")}</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={statusFilter}
-              onValueChange={(v) => {
-                setStatusFilter(v as UserStatus | "all");
-                setPage(1);
-              }}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder={t("userForm.status")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("userList.allStatuses")}</SelectItem>
-                <SelectItem value="active">{t("status.active")}</SelectItem>
-                <SelectItem value="suspended">
-                  {t("status.suspended")}
-                </SelectItem>
-                <SelectItem value="banned">{t("status.banned")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      <UserListFilters
+        search={search}
+        setSearch={setSearch}
+        roleFilter={roleFilter}
+        setRoleFilter={setRoleFilter}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        onFilterChange={() => setPage(1)}
+      />
 
       {/* 批量操作栏 */}
       <BatchActionBar

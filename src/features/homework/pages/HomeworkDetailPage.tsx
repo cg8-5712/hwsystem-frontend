@@ -1,13 +1,5 @@
 import { useTranslation } from "react-i18next";
-import {
-  FiArrowLeft,
-  FiBarChart2,
-  FiEdit2,
-  FiPaperclip,
-  FiPlayCircle,
-  FiTrash2,
-  FiUpload,
-} from "react-icons/fi";
+import { FiArrowLeft, FiEdit2, FiPaperclip, FiTrash2 } from "react-icons/fi";
 import { Link, useNavigate, useParams } from "react-router";
 import { FilePreviewDialog } from "@/components/file/FilePreviewDialog";
 import {
@@ -21,7 +13,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +34,11 @@ import type { GradeNavigationState } from "@/features/submission/pages/Submissio
 import { logger } from "@/lib/logger";
 import { notify } from "@/stores/useNotificationStore";
 import { useCurrentUser } from "@/stores/useUserStore";
+import { HomeworkInfoCard } from "../components/HomeworkInfoCard";
+import { MySubmissionCard } from "../components/MySubmissionCard";
+import { SubmissionManagementCard } from "../components/SubmissionManagementCard";
 import { useDeleteHomework, useHomework } from "../hooks/useHomework";
+import { useHomeworkStatus } from "../hooks/useHomeworkStatus";
 
 export function HomeworkDetailPage() {
   const { t } = useTranslation();
@@ -88,10 +83,14 @@ export function HomeworkDetailPage() {
     pendingData?.pagination?.total ?? pendingSubmissions.length,
   );
 
-  const isDeadlinePassed = homework?.deadline
-    ? new Date(homework.deadline) < new Date()
-    : false;
-  const canSubmit = !isDeadlinePassed || homework?.allow_late;
+  // 使用 useHomeworkStatus Hook 计算状态
+  const { canSubmit, statusLabel, statusVariant } = useHomeworkStatus(homework);
+
+  // 渲染状态徽章
+  const renderStatusBadge = () => {
+    if (!statusVariant) return null;
+    return <Badge variant={statusVariant}>{statusLabel}</Badge>;
+  };
 
   // 导航到批改页（带导航状态）
   const navigateToGrade = (submissionId: string) => {
@@ -118,28 +117,6 @@ export function HomeworkDetailPage() {
       logger.error("Failed to delete homework", error);
       notify.error(t("notify.homework.deleteFailed"));
     }
-  };
-
-  const getStatusBadge = () => {
-    if (!homework?.deadline) return null;
-    const deadline = new Date(homework.deadline);
-    const now = new Date();
-    if (now > deadline) {
-      return (
-        <Badge variant="destructive">{t("homeworkPage.status.expired")}</Badge>
-      );
-    }
-    const hoursLeft = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
-    if (hoursLeft < 24) {
-      return (
-        <Badge variant="secondary">
-          {t("homeworkPage.status.expiringSoon")}
-        </Badge>
-      );
-    }
-    return (
-      <Badge variant="default">{t("homeworkPage.status.inProgress")}</Badge>
-    );
   };
 
   if (error) {
@@ -183,7 +160,7 @@ export function HomeworkDetailPage() {
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  {getStatusBadge()}
+                  {renderStatusBadge()}
                   {canEditHomework && (
                     <>
                       <Button variant="outline" size="sm" asChild>
@@ -257,193 +234,34 @@ export function HomeworkDetailPage() {
 
           {/* 我的提交 */}
           {!isTeacherView && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("homeworkPage.mySubmission")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {mySubmission ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          {t("homeworkPage.submissionVersion", {
-                            version: mySubmission.version,
-                          })}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {t("homeworkPage.submittedAt")}{" "}
-                          {new Date(mySubmission.submitted_at).toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
-                        {mySubmission.grade ? (
-                          <Badge variant="default">
-                            {mySubmission.grade.score} / {homework?.max_score}
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">
-                            {t("homeworkPage.pendingGrade")}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    {mySubmission.grade?.comment && (
-                      <div className="p-3 rounded-lg bg-muted">
-                        <p className="text-sm text-muted-foreground">
-                          {t("homeworkPage.teacherComment")}
-                        </p>
-                        <p className="mt-1">{mySubmission.grade.comment}</p>
-                      </div>
-                    )}
-                    <div className="flex gap-3">
-                      <Button variant="outline" asChild>
-                        <Link
-                          to={`${prefix}/homework/${homeworkId}/submissions`}
-                        >
-                          {t("homeworkPage.viewHistory")}
-                        </Link>
-                      </Button>
-                      {canSubmit && (
-                        <Button asChild>
-                          <Link
-                            to={`${prefix}/classes/${classId}/homework/${homeworkId}/submit`}
-                          >
-                            <FiUpload className="mr-2 h-4 w-4" />
-                            {t("homeworkPage.resubmit")}
-                          </Link>
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-6">
-                    <p className="text-muted-foreground mb-4">
-                      {t("homeworkPage.notSubmitted")}
-                    </p>
-                    {canSubmit ? (
-                      <Button asChild>
-                        <Link
-                          to={`${prefix}/classes/${classId}/homework/${homeworkId}/submit`}
-                        >
-                          <FiUpload className="mr-2 h-4 w-4" />
-                          {t("homeworkPage.submitHomework")}
-                        </Link>
-                      </Button>
-                    ) : (
-                      <p className="text-sm text-destructive">
-                        {t("homeworkPage.deadlinePassed")}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <MySubmissionCard
+              submission={mySubmission}
+              maxScore={homework?.max_score}
+              canSubmit={canSubmit}
+              prefix={prefix}
+              classId={classId!}
+              homeworkId={homeworkId!}
+            />
           )}
         </div>
 
         {/* 侧边栏 */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("homeworkPage.homeworkInfo")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {homework?.creator && (
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    {t("homeworkPage.creator")}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage
-                        src={homework.creator?.avatar_url || undefined}
-                      />
-                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                        {(homework.creator.display_name ||
-                          homework.creator.username ||
-                          "?")[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <p className="font-medium">
-                      {homework.creator.display_name ||
-                        homework.creator.username}
-                    </p>
-                  </div>
-                </div>
-              )}
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  {t("homeworkPage.deadline")}
-                </p>
-                <p className="font-medium">
-                  {homework?.deadline
-                    ? new Date(homework.deadline).toLocaleString()
-                    : t("homeworkPage.noDeadline")}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  {t("homeworkPage.allowLate")}
-                </p>
-                <p className="font-medium">
-                  {homework?.allow_late
-                    ? t("homeworkPage.yes")
-                    : t("homeworkPage.no")}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  {t("homeworkPage.attachmentCount")}
-                </p>
-                <p className="font-medium">
-                  {homework?.attachments?.length || 0}{" "}
-                  {t("homeworkPage.attachmentUnit")}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <HomeworkInfoCard homework={homework} />
 
           {canViewSubmissions && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("homeworkPage.submissionManagement")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {canGrade && pendingCount > 0 && (
-                  <Button
-                    className="w-full"
-                    onClick={() =>
-                      navigateToGrade(
-                        String(pendingSubmissions[0].latest_submission.id),
-                      )
-                    }
-                  >
-                    <FiPlayCircle className="mr-2 h-4 w-4" />
-                    {t("submission.list.startGrading")}
-                    <Badge variant="secondary" className="ml-2">
-                      {pendingCount}
-                    </Badge>
-                  </Button>
-                )}
-                <Button variant="outline" className="w-full" asChild>
-                  <Link
-                    to={`${prefix}/classes/${classId}/homework/${homeworkId}/submissions`}
-                  >
-                    <FiBarChart2 className="mr-2 h-4 w-4" />
-                    {t("homeworkPage.viewSubmissions")}
-                  </Link>
-                </Button>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link
-                    to={`${prefix}/classes/${classId}/homework/${homeworkId}/stats`}
-                  >
-                    <FiBarChart2 className="mr-2 h-4 w-4" />
-                    {t("homeworkPage.homeworkStats")}
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <SubmissionManagementCard
+              canGrade={canGrade}
+              pendingCount={pendingCount}
+              onStartGrading={() =>
+                navigateToGrade(
+                  String(pendingSubmissions[0].latest_submission.id),
+                )
+              }
+              prefix={prefix}
+              classId={classId!}
+              homeworkId={homeworkId!}
+            />
           )}
         </div>
       </div>
