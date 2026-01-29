@@ -169,14 +169,14 @@ export function useAllClassesHomeworks(
     queries: classIds.map((classId) => ({
       queryKey: [
         ...homeworkKeys.list(classId, {
-          page_size: 100,
+          page_size: 50,
           include_stats: options?.include_stats,
         }),
         userId,
       ] as const,
       queryFn: () =>
         homeworkService.list(classId, {
-          page_size: 100,
+          page_size: 50,
           include_stats: options?.include_stats,
         }),
       enabled: !!classId && !!userId,

@@ -60,7 +60,7 @@ export function TeacherHomeworksPage() {
   const deleteHomework = useDeleteHomework();
 
   const { data: classData, isLoading: classLoading } = useClassList({
-    page_size: 100,
+    page_size: 20,
   });
   const classes = classData?.items ?? [];
 
