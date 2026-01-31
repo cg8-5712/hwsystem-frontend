@@ -12,6 +12,11 @@ export type AdminSettingsListResponse = { settings: Array<SystemSetting>, };
 export type BatchUpdateSettingsRequest = { settings: Array<UpdateSettingItem>, };
 
 /**
+ * 前端客户端配置响应
+ */
+export type ClientConfigResponse = { api_timeout: bigint, file_operation_timeout: bigint, max_file_size: string, allowed_file_types: Array<string>, };
+
+/**
  * 设置审计日志实体
  */
 export type SettingAudit = { id: string, setting_key: string, old_value: string | null, new_value: string, changed_by: string, changed_at: string, ip_address: string | null, };

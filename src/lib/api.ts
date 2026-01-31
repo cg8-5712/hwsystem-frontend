@@ -7,8 +7,8 @@ import i18n from "@/app/i18n";
 import { useUserStore } from "@/stores/useUserStore";
 import type { ApiResponse } from "@/types/generated";
 import { ErrorCode } from "@/types/generated/error_code";
+import { AppConfig } from "./appConfig";
 import { getApiBaseUrl } from "./config";
-import { API_TIMEOUT } from "./constants";
 import { type ApiError, getErrorMessage } from "./errors";
 
 // Token 刷新 Promise（用于防止并发刷新）
@@ -45,15 +45,18 @@ function getRefreshToken(): Promise<string> {
 
 const api = axios.create({
   baseURL: getApiBaseUrl(),
-  timeout: API_TIMEOUT,
+  timeout: 10000, // 初始默认值，将在请求拦截器中动态更新
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// 请求拦截器：添加 Token
+// 请求拦截器：添加 Token 和动态超时
 api.interceptors.request.use(
   (config) => {
+    // 动态设置超时时间
+    config.timeout = AppConfig.apiTimeout;
+
     // 从内存 store 获取 token（不再从 localStorage）
     const token = useUserStore.getState().accessToken;
     if (token) {

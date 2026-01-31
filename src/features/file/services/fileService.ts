@@ -1,6 +1,6 @@
 import api from "@/lib/api";
+import { AppConfig } from "@/lib/appConfig";
 import { getApiBaseUrl } from "@/lib/config";
-import { FILE_OPERATION_TIMEOUT } from "@/lib/constants";
 import { useUserStore } from "@/stores/useUserStore";
 import type { FileUploadResponse } from "@/types/generated";
 
@@ -16,7 +16,7 @@ const getAuthToken = () => useUserStore.getState().accessToken;
 async function fetchWithTimeout(
   url: string,
   options: RequestInit,
-  timeout: number = FILE_OPERATION_TIMEOUT,
+  timeout: number = AppConfig.fileOperationTimeout,
 ): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
@@ -45,7 +45,7 @@ export const fileService = {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-        timeout: FILE_OPERATION_TIMEOUT,
+        timeout: AppConfig.fileOperationTimeout,
       },
     );
     return data.data;

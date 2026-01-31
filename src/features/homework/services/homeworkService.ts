@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { FILE_OPERATION_TIMEOUT } from "@/lib/constants";
+import { AppConfig } from "@/lib/appConfig";
 import type {
   AllHomeworksResponse,
   CreateHomeworkRequest,
@@ -154,7 +154,7 @@ export const homeworkService = {
   exportStats: async (homeworkId: string) => {
     const response = await api.get(`/homeworks/${homeworkId}/stats/export`, {
       responseType: "blob",
-      timeout: FILE_OPERATION_TIMEOUT,
+      timeout: AppConfig.fileOperationTimeout,
     });
     return response.data as Blob;
   },

@@ -5,11 +5,9 @@
 
 // ============ API 配置 ============
 
-/** API 请求超时时间（毫秒） */
-export const API_TIMEOUT = 10000;
-
-/** 文件操作超时时间（毫秒）- 上传/导入/导出等大文件操作 */
-export const FILE_OPERATION_TIMEOUT = 120000;
+// DEPRECATED: 从后端 /api/v1/system/client-config 动态获取
+// export const API_TIMEOUT = 10000;
+// export const FILE_OPERATION_TIMEOUT = 120000;
 
 // ============ 分页配置 ============
 
