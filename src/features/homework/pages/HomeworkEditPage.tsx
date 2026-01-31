@@ -28,6 +28,8 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useRoutePrefix } from "@/features/class/hooks/useClassBasePath";
 import { fileService } from "@/features/file/services/fileService";
+import { validateFiles } from "@/features/file/services/fileValidation";
+import { formatBatchFileValidationErrors } from "@/features/file/utils/formatFileError";
 import { logger } from "@/lib/logger";
 import { notify } from "@/stores/useNotificationStore";
 import { useHomework, useUpdateHomework } from "../hooks/useHomework";
@@ -121,6 +123,20 @@ export function HomeworkEditPage() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    // 客户端验证
+    const validationResult = validateFiles(Array.from(files));
+
+    if (!validationResult.valid) {
+      const errorMessage = formatBatchFileValidationErrors(
+        validationResult.errors,
+        t,
+      );
+      notify.error(t("error.fileValidationFailed"), errorMessage);
+      e.target.value = "";
+      return;
+    }
+
+    // 上传步骤
     setUploading(true);
     try {
       for (const file of Array.from(files)) {

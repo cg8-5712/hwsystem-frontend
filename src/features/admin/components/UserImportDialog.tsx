@@ -16,7 +16,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { validateFile } from "@/features/file/services/fileValidation";
+import { formatFileValidationError } from "@/features/file/utils/formatFileError";
 import { cn } from "@/lib/utils";
+import { notify } from "@/stores/useNotificationStore";
 import {
   type UserImportResponseStringified,
   useDownloadImportTemplate,
@@ -42,25 +45,46 @@ export function UserImportDialog({
   const importMutation = useImportUsers();
   const downloadTemplateMutation = useDownloadImportTemplate();
 
-  const handleFileSelect = useCallback((file: File | null) => {
-    if (file) {
-      const validTypes = [
-        "text/csv",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "application/vnd.ms-excel",
-      ];
-      const isValidType =
-        validTypes.includes(file.type) ||
-        file.name.endsWith(".csv") ||
-        file.name.endsWith(".xlsx");
+  const handleFileSelect = useCallback(
+    (file: File | null) => {
+      if (file) {
+        // 1. CSV/XLSX 类型检查（保留现有逻辑）
+        const validTypes = [
+          "text/csv",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "application/vnd.ms-excel",
+        ];
+        const isValidType =
+          validTypes.includes(file.type) ||
+          file.name.endsWith(".csv") ||
+          file.name.endsWith(".xlsx");
 
-      if (!isValidType) {
-        return;
+        if (!isValidType) {
+          notify.error(
+            t("error.fileTypeNotAllowed"),
+            t("admin.users.import.supportedFormats"),
+          );
+          return;
+        }
+
+        // 2. 文件大小和空文件验证（新增）
+        const validationError = validateFile(file);
+        if (validationError) {
+          const errorMessage = formatFileValidationError(validationError, t);
+          notify.error(
+            validationError.errorType === "size"
+              ? t("error.fileSizeExceeded")
+              : t("error.fileValidationFailed"),
+            errorMessage,
+          );
+          return;
+        }
       }
-    }
-    setSelectedFile(file);
-    setImportResult(null);
-  }, []);
+      setSelectedFile(file);
+      setImportResult(null);
+    },
+    [t],
+  );
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
