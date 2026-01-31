@@ -114,13 +114,18 @@ export function GradePage() {
     },
   });
 
+  // 重置 isAutoJumping 状态，防止跳转后卡在"提交中..."
+  // biome-ignore lint/correctness/useExhaustiveDependencies: 需要在 submissionId 变化时重置状态
   useEffect(() => {
-    if (existingGrade) {
-      form.reset({
-        score: existingGrade.score,
-        comment: existingGrade.comment || "",
-      });
-    }
+    setIsAutoJumping(false);
+  }, [submissionId]);
+
+  // 重置表单数据，无论是否有已有评分
+  useEffect(() => {
+    form.reset({
+      score: existingGrade?.score ?? 0,
+      comment: existingGrade?.comment ?? "",
+    });
   }, [existingGrade, form]);
 
   // 计算导航信息
@@ -210,13 +215,13 @@ export function GradePage() {
           score: values.score,
           comment: values.comment || null,
         });
-        notify.success(t("grade.success.updated"));
+        // 移除这里的 toast，避免重复提示
       } else {
         await createGrade.mutateAsync({
           score: values.score,
           comment: values.comment || null,
         });
-        notify.success(t("grade.success.created"));
+        // 移除这里的 toast，避免重复提示
       }
 
       // 批改完成后的行为：通过 API 获取下一个待批改的提交
@@ -250,14 +255,12 @@ export function GradePage() {
               );
               if (filtered.length > 0) {
                 notify.success(t("grade.navigation.autoNext"));
-                setTimeout(() => {
-                  navigate(
-                    `${prefix}/submissions/${filtered[0].latest_submission.id}/grade`,
-                    {
-                      state: { homeworkId, classId: navState?.classId },
-                    },
-                  );
-                }, 800);
+                navigate(
+                  `${prefix}/submissions/${filtered[0].latest_submission.id}/grade`,
+                  {
+                    state: { homeworkId, classId: navState?.classId },
+                  },
+                );
               } else {
                 // 全部批改完成
                 notify.success(t("grade.navigation.allCompleted"));
@@ -265,14 +268,12 @@ export function GradePage() {
               }
             } else {
               notify.success(t("grade.navigation.autoNext"));
-              setTimeout(() => {
-                navigate(
-                  `${prefix}/submissions/${nextSubmission.latest_submission.id}/grade`,
-                  {
-                    state: { homeworkId, classId: navState?.classId },
-                  },
-                );
-              }, 800);
+              navigate(
+                `${prefix}/submissions/${nextSubmission.latest_submission.id}/grade`,
+                {
+                  state: { homeworkId, classId: navState?.classId },
+                },
+              );
             }
           } else {
             // 全部批改完成

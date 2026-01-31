@@ -106,11 +106,12 @@ export function useMyLatestSubmission(homeworkId: string) {
 export function useSubmissionSummary(
   homeworkId: string,
   params?: { page?: number; page_size?: number; graded?: boolean },
+  enabled = true,
 ) {
   return useQuery({
     queryKey: submissionKeys.summary(homeworkId, params),
     queryFn: () => submissionService.getSummary(homeworkId, params),
-    enabled: !!homeworkId,
+    enabled: !!homeworkId && enabled,
     staleTime: 30 * 1000, // 30秒过期
     refetchOnMount: "always", // 每次挂载都刷新
   });

@@ -275,6 +275,7 @@ export function NotificationListPage() {
                                 onClick={(e) =>
                                   handleMarkAsRead(notification.id, e)
                                 }
+                                disabled={markAsRead.isPending}
                               >
                                 <FiCheck className="mr-1 h-4 w-4" />
                                 {t("notification.markAsRead")}
@@ -284,6 +285,7 @@ export function NotificationListPage() {
                               variant="ghost"
                               size="sm"
                               onClick={(e) => handleDelete(notification.id, e)}
+                              disabled={deleteNotification.isPending}
                             >
                               <FiTrash2 className="h-4 w-4" />
                             </Button>

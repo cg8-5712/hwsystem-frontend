@@ -74,7 +74,8 @@ export function HomeworkDetailPage() {
   // 获取待批改的提交（使用 graded=false 筛选，避免分页问题）
   const { data: pendingData } = useSubmissionSummary(
     homeworkId!,
-    canGrade ? { graded: false } : undefined,
+    { graded: false },
+    canGrade,
   );
 
   // 待批改列表和数量
