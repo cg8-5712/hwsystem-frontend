@@ -33,7 +33,9 @@
     "download": "下载",
     "selectAll": "全选",
     "actions": "操作",
-    "search": "搜索"
+    "search": "搜索",
+    "score": "分",
+    "unknown": "未知"
   },
   "notify": {
     "file": {
@@ -1124,7 +1126,7 @@
     "backToDetail": "返回班级详情",
     "fields": {
       "name": "班级名称",
-      "namePlaceholder": "例如：数据结构 2026春季班",
+      "namePlaceholder": "例如：三年级二班 / 初一数学班",
       "nameDescription": "为班级起一个简洁明了的名称",
       "descriptionLabel": "班级描述（可选）",
       "descriptionPlaceholder": "添加班级描述，如课程内容、上课时间等",
@@ -1293,8 +1295,8 @@
     },
     "commentTemplates": {
       "excellent": {
-        "label": "完成度高，代码规范",
-        "value": "完成度高，代码规范，逻辑清晰。继续保持！"
+        "label": "完成度高，质量优秀",
+        "value": "作业完成度高，质量优秀，表现出色。继续保持！"
       },
       "good": {
         "label": "整体不错，有小问题",
@@ -1330,7 +1332,13 @@
       "allCompleted": "所有待批改作业已完成！",
       "continueHint": "可点击「下一个」继续批改",
       "autoNext": "批改成功，即将跳转到下一个...",
-      "shortcutHint": "快速切换"
+      "shortcutHint": "快速切换",
+      "currentStudent": "正在批改"
+    },
+    "context": {
+      "class": "班级",
+      "homework": "作业",
+      "maxScore": "满分"
     }
   },
   "userForm": {
@@ -1436,13 +1444,17 @@
     "title": "提交作业",
     "versionNumber": "第 {{version}} 次提交",
     "contentLabel": "作业内容",
-    "contentPlaceholder": "在这里填写你的作业内容...",
+    "contentPlaceholder": "在这里填写你的作业答案...",
     "contentDesc": "支持纯文本，可以配合附件一起提交",
     "attachmentLabel": "附件（可选）",
     "uploading": "上传中...",
     "uploadFile": "上传文件",
     "submitting": "提交中...",
-    "submit": "提交作业"
+    "submit": "提交作业",
+    "deadline": "截止时间",
+    "maxScore": "满分",
+    "requirements": "作业要求",
+    "referenceAttachments": "参考附件"
   },
   "homeworkForm": {
     "validation": {
@@ -1458,9 +1470,9 @@
     "createTitle": "布置作业",
     "createDescription": "创建新的作业任务",
     "titleLabel": "作业标题",
-    "titlePlaceholder": "例如：链表实现",
+    "titlePlaceholder": "例如：第三单元练习 / 古诗词背诵",
     "descriptionLabel": "作业描述（可选）",
-    "descriptionPlaceholder": "详细描述作业要求...",
+    "descriptionPlaceholder": "详细描述作业内容和要求...",
     "maxScoreLabel": "满分",
     "deadlineLabel": "截止时间（可选）",
     "allowLateLabel": "允许迟交",
@@ -1473,7 +1485,10 @@
   "classCreatePage": {
     "title": "创建班级",
     "description": "创建一个新的班级，学生可以通过邀请码加入",
-    "createClass": "创建班级"
+    "createClass": "创建班级",
+    "fields": {
+      "namePlaceholder": "例如：三年级二班 / 初一数学班"
+    }
   },
   "filePreview": {
     "loadFailed": "加载预览失败",

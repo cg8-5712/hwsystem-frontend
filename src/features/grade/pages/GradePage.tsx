@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
   FiArrowLeft,
-  FiCheck,
   FiChevronLeft,
   FiChevronRight,
   FiClock,
@@ -43,6 +42,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { useClass } from "@/features/class/hooks/useClass";
 import { useRoutePrefix } from "@/features/class/hooks/useClassBasePath";
 import { useSubmission } from "@/features/submission/hooks/useSubmission";
 import type { GradeNavigationState } from "@/features/submission/pages/SubmissionListPage";
@@ -96,6 +96,10 @@ export function GradePage() {
   // 优先使用导航状态的 homeworkId，否则从 submission 中获取
   const homeworkId =
     navState?.homeworkId || submission?.homework_id?.toString();
+
+  // 获取班级信息用于显示上下文
+  const classId = navState?.classId?.toString();
+  const { data: classData } = useClass(classId!);
 
   const createGrade = useCreateGrade(submissionId!, homeworkId);
   // useUpdateGrade 需要 gradeId，从 submission.grade 获取
@@ -258,7 +262,7 @@ export function GradePage() {
                 navigate(
                   `${prefix}/submissions/${filtered[0].latest_submission.id}/grade`,
                   {
-                    state: { homeworkId, classId: navState?.classId },
+                    state: navState,
                   },
                 );
               } else {
@@ -271,7 +275,7 @@ export function GradePage() {
               navigate(
                 `${prefix}/submissions/${nextSubmission.latest_submission.id}/grade`,
                 {
-                  state: { homeworkId, classId: navState?.classId },
+                  state: navState,
                 },
               );
             }
@@ -314,19 +318,59 @@ export function GradePage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-8">
+      {/* 作业上下文信息条 */}
+      {submission?.homework && (
+        <Card className="mb-4">
+          <CardContent className="py-3">
+            <div className="flex items-center flex-wrap gap-2 text-sm">
+              {classData?.name && (
+                <>
+                  <span className="text-muted-foreground">
+                    {t("grade.context.class")}:
+                  </span>
+                  <span className="font-medium">{classData.name}</span>
+                  <span className="text-muted-foreground mx-2">|</span>
+                </>
+              )}
+              <span className="text-muted-foreground">
+                {t("grade.context.homework")}:
+              </span>
+              <span className="font-medium">{submission.homework.title}</span>
+              <span className="text-muted-foreground mx-2">|</span>
+              <span className="text-muted-foreground">
+                {t("grade.context.maxScore")}:
+              </span>
+              <span className="font-medium">
+                {submission.homework.max_score} {t("common.score")}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* 工作流导航条 */}
       {navigationInfo ? (
         <div className="mb-6 space-y-3">
           {/* 进度条和计数 */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-foreground flex items-center gap-2">
-                <FiCheck className="h-4 w-4 text-green-600" />
-                {t("grade.navigation.progress")}
-              </span>
-              <Badge variant="secondary" className="text-base px-3 py-1">
-                {navigationInfo.current} / {navigationInfo.total}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">
+                  {t("grade.navigation.currentStudent")}:
+                </span>
+                <span className="font-medium text-foreground">
+                  {navState?.pendingList[navigationInfo.current - 1]
+                    ?.studentName || t("common.unknown")}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">
+                  {t("grade.navigation.progress")}:
+                </span>
+                <Badge variant="secondary" className="text-base px-3 py-1">
+                  {navigationInfo.current} / {navigationInfo.total}
+                </Badge>
+              </div>
             </div>
             <Progress
               value={(navigationInfo.current / navigationInfo.total) * 100}
@@ -436,15 +480,12 @@ export function GradePage() {
         </div>
 
         {/* 评分表单 */}
-        <div className="space-y-6">
-          {/* 学生信息 */}
+        <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+          {/* 评分 */}
           <Card>
-            <CardHeader>
-              <CardTitle>{t("grade.studentInfo")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-3">
-                <Avatar>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3 mb-3">
+                <Avatar className="h-10 w-10">
                   <AvatarImage
                     src={submission?.creator?.avatar_url || undefined}
                   />
@@ -454,29 +495,25 @@ export function GradePage() {
                       "?")[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="font-medium">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">
                     {submission?.creator?.display_name ||
                       submission?.creator?.username}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground truncate">
                     @{submission?.creator?.username}
                   </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* 评分 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {isEditing ? t("grade.editGrade") : t("grade.grade")}
-              </CardTitle>
-              <CardDescription>
-                {t("grade.maxScore")} {submission?.homework?.max_score || 100}{" "}
-                {t("grade.points")}
-              </CardDescription>
+              <div>
+                <CardTitle className="text-base">
+                  {isEditing ? t("grade.editGrade") : t("grade.grade")}
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  {t("grade.maxScore")} {submission?.homework?.max_score || 100}{" "}
+                  {t("grade.points")}
+                </CardDescription>
+              </div>
             </CardHeader>
             <CardContent>
               <Form {...form}>
@@ -489,9 +526,11 @@ export function GradePage() {
                     name="score"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("grade.score")}</FormLabel>
-                        {/* 快速评分按钮 */}
-                        <div className="flex flex-wrap gap-2 mb-2">
+                        <FormLabel className="text-sm">
+                          {t("grade.score")}
+                        </FormLabel>
+                        {/* 快速评分按钮 - 精简版 */}
+                        <div className="grid grid-cols-2 gap-2 mb-2">
                           {QUICK_SCORES.map((preset) => {
                             // 根据满分比例计算实际分数
                             const maxScore =
@@ -510,13 +549,17 @@ export function GradePage() {
                                 }
                                 size="sm"
                                 onClick={() => field.onChange(actualScore)}
-                                className="cursor-pointer"
+                                className="h-9 text-sm justify-start"
                               >
                                 <span
-                                  className={`w-2 h-2 rounded-full ${preset.color} mr-1.5`}
+                                  className={`w-2 h-2 rounded-full ${preset.color} mr-2 shrink-0`}
                                 />
-                                {t(`grade.quickScore.${preset.key}`)} (
-                                {actualScore})
+                                <span className="truncate">
+                                  {t(`grade.quickScore.${preset.key}`)}
+                                </span>
+                                <span className="ml-auto font-mono">
+                                  {actualScore}
+                                </span>
                               </Button>
                             );
                           })}
@@ -532,7 +575,7 @@ export function GradePage() {
                             }
                           />
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-xs">
                           0 - {submission?.homework?.max_score || 100}{" "}
                           {t("grade.points")}
                         </FormDescription>
@@ -546,7 +589,7 @@ export function GradePage() {
                     name="comment"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>
+                        <FormLabel className="text-sm">
                           {t("grade.comment")}（{t("grade.optional")}）
                         </FormLabel>
                         {/* 常用评语下拉 */}
@@ -565,14 +608,18 @@ export function GradePage() {
                             }
                           }}
                         >
-                          <SelectTrigger className="w-full mb-2">
+                          <SelectTrigger className="w-full mb-2 h-8 text-xs">
                             <SelectValue
                               placeholder={t("grade.selectTemplate")}
                             />
                           </SelectTrigger>
                           <SelectContent>
                             {COMMENT_TEMPLATE_KEYS.map((key) => (
-                              <SelectItem key={key} value={key}>
+                              <SelectItem
+                                key={key}
+                                value={key}
+                                className="text-xs"
+                              >
                                 {t(`grade.commentTemplates.${key}.label`)}
                               </SelectItem>
                             ))}
@@ -581,7 +628,8 @@ export function GradePage() {
                         <FormControl>
                           <Textarea
                             placeholder={t("grade.commentPlaceholder")}
-                            rows={4}
+                            rows={3}
+                            className="text-sm"
                             {...field}
                           />
                         </FormControl>
@@ -590,39 +638,36 @@ export function GradePage() {
                     )}
                   />
 
-                  <div className="flex flex-col gap-2">
-                    {/* 主要按钮组 */}
-                    <div className="flex gap-3">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() => navigate(-1)}
-                        disabled={isPending || isAutoJumping}
-                      >
-                        {t("common.cancel")}
-                      </Button>
-                      <Button
-                        type="submit"
-                        className="flex-1"
-                        disabled={
-                          !form.formState.isValid || isPending || isAutoJumping
-                        }
-                      >
-                        {isPending || isAutoJumping
-                          ? t("grade.submitting")
-                          : navigationInfo?.next
-                            ? t("grade.submitAndNext")
-                            : isEditing
-                              ? t("grade.updateGrade")
-                              : t("grade.submitGrade")}
-                        {navigationInfo?.next &&
-                          !isPending &&
-                          !isAutoJumping && (
-                            <FiChevronRight className="ml-1 h-4 w-4" />
-                          )}
-                      </Button>
-                    </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => navigate(-1)}
+                      disabled={isPending || isAutoJumping}
+                    >
+                      {t("common.cancel")}
+                    </Button>
+                    <Button
+                      type="submit"
+                      size="sm"
+                      className="flex-1"
+                      disabled={
+                        !form.formState.isValid || isPending || isAutoJumping
+                      }
+                    >
+                      {isPending || isAutoJumping
+                        ? t("grade.submitting")
+                        : navigationInfo?.next
+                          ? t("grade.submitAndNext")
+                          : isEditing
+                            ? t("grade.updateGrade")
+                            : t("grade.submitGrade")}
+                      {navigationInfo?.next && !isPending && !isAutoJumping && (
+                        <FiChevronRight className="ml-1 h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
                 </form>
               </Form>

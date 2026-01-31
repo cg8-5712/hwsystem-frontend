@@ -7,6 +7,8 @@ import {
   FiAlertCircle,
   FiAlertTriangle,
   FiArrowLeft,
+  FiAward,
+  FiChevronDown,
   FiClock,
   FiFile,
   FiUpload,
@@ -14,6 +16,7 @@ import {
 } from "react-icons/fi";
 import { Link, useNavigate, useParams } from "react-router";
 import { z } from "zod";
+import { FilePreviewDialog } from "@/components/file/FilePreviewDialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +26,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Form,
   FormControl,
@@ -329,8 +337,71 @@ export function SubmitHomeworkPage() {
             {latestSubmission &&
               ` · ${t("submitHomework.versionNumber", { version: latestSubmission.version + 1 })}`}
           </CardDescription>
+          {/* 关键信息：截止时间和满分 */}
+          {homework && (
+            <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+              {homework.deadline && (
+                <div className="flex items-center gap-1">
+                  <FiClock className="h-4 w-4" />
+                  <span>
+                    {t("submitHomework.deadline")}:{" "}
+                    {new Date(homework.deadline).toLocaleString()}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center gap-1">
+                <FiAward className="h-4 w-4" />
+                <span>
+                  {t("submitHomework.maxScore")}: {homework.max_score}{" "}
+                  {t("common.score")}
+                </span>
+              </div>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
+          {/* 作业要求折叠面板 */}
+          {homework?.description && (
+            <Collapsible defaultOpen className="mb-6">
+              <Card>
+                <CollapsibleTrigger className="w-full">
+                  <CardHeader className="cursor-pointer p-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm">
+                        {t("submitHomework.requirements")}
+                      </CardTitle>
+                      <FiChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <p className="text-sm whitespace-pre-wrap text-muted-foreground">
+                      {homework.description}
+                    </p>
+                    {/* 参考附件 */}
+                    {homework.attachments &&
+                      homework.attachments.length > 0 && (
+                        <div className="mt-4 pt-4 border-t">
+                          <p className="text-sm font-medium mb-2">
+                            {t("submitHomework.referenceAttachments")}:
+                          </p>
+                          <div className="space-y-2">
+                            {homework.attachments.map((file) => (
+                              <FilePreviewDialog
+                                key={file.download_token}
+                                file={file}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          )}
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField

@@ -33,7 +33,9 @@
     "download": "Download",
     "selectAll": "Select All",
     "actions": "Actions",
-    "search": "Search"
+    "search": "Search",
+    "score": "Score",
+    "unknown": "Unknown"
   },
   "notify": {
     "file": {
@@ -1124,7 +1126,7 @@
     "backToDetail": "Back to Class",
     "fields": {
       "name": "Class Name",
-      "namePlaceholder": "e.g. Data Structures Spring 2026",
+      "namePlaceholder": "e.g., Grade 3 Class 2 / Math Class",
       "nameDescription": "Give your class a clear name",
       "descriptionLabel": "Description (Optional)",
       "descriptionPlaceholder": "Add class description, schedule, etc.",
@@ -1293,8 +1295,8 @@
     },
     "commentTemplates": {
       "excellent": {
-        "label": "Well done, clean code",
-        "value": "Well completed, clean code, clear logic. Keep it up!"
+        "label": "Excellent Quality",
+        "value": "Excellent completion and quality. Great work! Keep it up!"
       },
       "good": {
         "label": "Good overall, minor issues",
@@ -1330,7 +1332,13 @@
       "allCompleted": "All pending reviews completed!",
       "continueHint": "Click \"Next\" to continue grading",
       "autoNext": "Grading successful, jumping to next...",
-      "shortcutHint": "Quick switch"
+      "shortcutHint": "Quick switch",
+      "currentStudent": "Current Student"
+    },
+    "context": {
+      "class": "Class",
+      "homework": "Homework",
+      "maxScore": "Max Score"
     }
   },
   "userForm": {
@@ -1436,13 +1444,17 @@
     "title": "Submit Homework",
     "versionNumber": "Submission #{{version}}",
     "contentLabel": "Homework Content",
-    "contentPlaceholder": "Write your homework content here...",
+    "contentPlaceholder": "Write your homework answer here...",
     "contentDesc": "Plain text supported, can submit with attachments",
     "attachmentLabel": "Attachments (Optional)",
     "uploading": "Uploading...",
     "uploadFile": "Upload File",
     "submitting": "Submitting...",
-    "submit": "Submit Homework"
+    "submit": "Submit Homework",
+    "deadline": "Deadline",
+    "maxScore": "Max Score",
+    "requirements": "Requirements",
+    "referenceAttachments": "Reference Attachments"
   },
   "homeworkForm": {
     "validation": {
@@ -1458,9 +1470,9 @@
     "createTitle": "Create Homework",
     "createDescription": "Create a new assignment",
     "titleLabel": "Homework Title",
-    "titlePlaceholder": "e.g. Linked List Implementation",
+    "titlePlaceholder": "e.g., Unit 3 Practice / Poetry Recitation",
     "descriptionLabel": "Description (Optional)",
-    "descriptionPlaceholder": "Describe the requirements...",
+    "descriptionPlaceholder": "Describe the homework content and requirements...",
     "maxScoreLabel": "Max Score",
     "deadlineLabel": "Deadline (Optional)",
     "allowLateLabel": "Allow Late Submission",
@@ -1473,7 +1485,10 @@
   "classCreatePage": {
     "title": "Create Class",
     "description": "Create a new class, students can join with an invite code",
-    "createClass": "Create Class"
+    "createClass": "Create Class",
+    "fields": {
+      "namePlaceholder": "e.g., Grade 3 Class 2 / Math Class"
+    }
   },
   "filePreview": {
     "loadFailed": "Failed to load preview",
