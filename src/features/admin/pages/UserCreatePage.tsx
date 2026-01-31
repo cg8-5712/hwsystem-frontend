@@ -228,7 +228,10 @@ export default function UserCreatePage() {
               />
 
               <div className="flex gap-4">
-                <Button type="submit" disabled={createUser.isPending}>
+                <Button
+                  type="submit"
+                  disabled={!form.formState.isValid || createUser.isPending}
+                >
                   <FiSave className="mr-2 h-4 w-4" />
                   {createUser.isPending
                     ? t("common.creating")

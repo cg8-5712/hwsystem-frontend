@@ -604,7 +604,9 @@ export function GradePage() {
                       <Button
                         type="submit"
                         className="flex-1"
-                        disabled={isPending || isAutoJumping}
+                        disabled={
+                          !form.formState.isValid || isPending || isAutoJumping
+                        }
                       >
                         {isPending || isAutoJumping
                           ? t("grade.submitting")

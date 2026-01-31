@@ -164,7 +164,11 @@ export function LoginPage() {
                 </Link>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={!form.formState.isValid || isLoading}
+              >
                 {isLoading
                   ? t("auth.login.loggingIn")
                   : t("auth.login.loginButton")}

@@ -231,7 +231,10 @@ export function ClassCreatePage() {
                 >
                   {t("common.cancel")}
                 </Button>
-                <Button type="submit" disabled={createClass.isPending}>
+                <Button
+                  type="submit"
+                  disabled={!form.formState.isValid || createClass.isPending}
+                >
                   {createClass.isPending
                     ? t("common.creating")
                     : t("classCreatePage.createClass")}
