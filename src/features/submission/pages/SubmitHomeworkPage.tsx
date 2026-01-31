@@ -246,12 +246,17 @@ export function SubmitHomeworkPage() {
     setUploadedFiles((prev) => prev.filter((f) => f.download_token !== token));
   };
 
-  const onSubmit = async (values: FormValues) => {
-    if (!values.content && uploadedFiles.length === 0) {
-      notify.warning(t("notify.submission.contentRequired"));
-      return;
-    }
+  // 检查是否可以提交
+  const isSubmitReady = useMemo(() => {
+    const hasContent = !!form.watch("content")?.trim();
+    const hasFiles = uploadedFiles.length > 0;
+    const isUploading = uploadTasks.size > 0;
 
+    // 至少有内容或文件，且没有正在上传的文件
+    return (hasContent || hasFiles) && !isUploading;
+  }, [form.watch, uploadedFiles.length, uploadTasks.size]);
+
+  const onSubmit = async (values: FormValues) => {
     try {
       await createSubmission.mutateAsync({
         content: values.content || "",
@@ -389,7 +394,9 @@ export function SubmitHomeworkPage() {
                       ) : (
                         <FiClock className="h-4 w-4 text-muted-foreground" />
                       )}
-                      <span className="text-sm truncate flex-1">{fileName}</span>
+                      <span className="text-sm truncate flex-1">
+                        {fileName}
+                      </span>
                       <span className="text-xs text-muted-foreground">
                         {task.progress}%
                       </span>
@@ -449,7 +456,10 @@ export function SubmitHomeworkPage() {
                 >
                   {t("common.cancel")}
                 </Button>
-                <Button type="submit" disabled={createSubmission.isPending}>
+                <Button
+                  type="submit"
+                  disabled={!isSubmitReady || createSubmission.isPending}
+                >
                   {createSubmission.isPending
                     ? t("submitHomework.submitting")
                     : t("submitHomework.submit")}

@@ -480,7 +480,9 @@ export function HomeworkEditPage() {
                       ) : (
                         <FiClock className="h-4 w-4 text-muted-foreground" />
                       )}
-                      <span className="text-sm truncate flex-1">{fileName}</span>
+                      <span className="text-sm truncate flex-1">
+                        {fileName}
+                      </span>
                       <span className="text-xs text-muted-foreground">
                         {task.progress}%
                       </span>
@@ -542,7 +544,10 @@ export function HomeworkEditPage() {
                 >
                   {t("common.cancel")}
                 </Button>
-                <Button type="submit" disabled={updateHomework.isPending}>
+                <Button
+                  type="submit"
+                  disabled={!form.formState.isValid || updateHomework.isPending}
+                >
                   {updateHomework.isPending
                     ? t("common.saving")
                     : t("common.save")}
