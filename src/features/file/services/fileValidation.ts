@@ -134,8 +134,13 @@ export async function validateFileWithCompression(
   let processedFile = file;
   try {
     processedFile = await compressImage(file);
-  } catch {
-    // 压缩失败，使用原文件继续验证
+  } catch (error) {
+    // Re-throw AbortError to allow cancellation to propagate.
+    if ((error as Error).name === "AbortError") {
+      throw error;
+    }
+    // compressImage handles other errors by returning the original file.
+    // This catch is a fallback for other unexpected errors.
     processedFile = file;
   }
 
