@@ -3,6 +3,7 @@ import { AppConfig } from "@/lib/appConfig";
 import { getApiBaseUrl } from "@/lib/config";
 import { useUserStore } from "@/stores/useUserStore";
 import type { FileUploadResponse } from "@/types/generated";
+import { compressImage } from "./imageCompression";
 
 // 直接使用生成的类型
 export type FileUploadResult = FileUploadResponse;
@@ -44,8 +45,24 @@ export const fileService = {
     file: File,
     options?: UploadOptions,
   ): Promise<FileUploadResult> => {
+    // 上传前尝试压缩图片
+    let fileToUpload: File;
+    try {
+      fileToUpload = await compressImage(file, {
+        signal: options?.signal,
+        // 注意：压缩进度不传递给 onProgress，因为会和上传进度混淆
+      });
+    } catch (error) {
+      // 如果压缩被取消，直接抛出
+      if ((error as Error).name === "AbortError") {
+        throw error;
+      }
+      // 其他错误：使用原文件继续上传
+      fileToUpload = file;
+    }
+
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", fileToUpload);
 
     const { data } = await api.post<{ data: FileUploadResponse }>(
       "/files/upload",

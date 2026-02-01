@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { logger } from "@/lib/logger";
+import { ImageCompressionTester } from "../components/ImageCompressionTester";
 import {
   useAdminSettings,
   useSettingAudits,
@@ -71,6 +72,12 @@ const settingLabels: Record<string, string> = {
   "upload.allowed_types": "允许的文件类型",
   "cors.allowed_origins": "允许的跨域来源",
   "cors.max_age": "预检请求缓存时间（秒）",
+  // 图片压缩配置
+  "upload.client_compress_enabled": "启用前端压缩",
+  "upload.compress_threshold": "压缩阈值（字节）",
+  "upload.compress_quality": "压缩质量（0-1）",
+  "upload.compress_max_width": "压缩最大宽度（像素）",
+  "upload.compress_max_height": "压缩最大高度（像素）",
 };
 
 // 可编辑设置项组件
@@ -330,6 +337,19 @@ export function SystemSettingsPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* 图片压缩测试 */}
+          <ImageCompressionTester
+            onApplySettings={(params) => {
+              // 批量更新配置
+              handleUpdateSetting("upload.compress_quality", params.quality);
+              handleUpdateSetting("upload.compress_max_width", params.maxWidth);
+              handleUpdateSetting(
+                "upload.compress_max_height",
+                params.maxHeight,
+              );
+            }}
+          />
 
           {/* 存储信息提示 */}
           <Card className="bg-muted/30">

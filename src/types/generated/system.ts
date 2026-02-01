@@ -14,7 +14,7 @@ export type BatchUpdateSettingsRequest = { settings: Array<UpdateSettingItem>, }
 /**
  * 前端客户端配置响应
  */
-export type ClientConfigResponse = { api_timeout: bigint, file_operation_timeout: bigint, max_file_size: string, allowed_file_types: Array<string>, };
+export type ClientConfigResponse = { api_timeout: bigint, file_operation_timeout: bigint, max_file_size: string, allowed_file_types: Array<string>, client_compress_enabled: boolean, compress_threshold: string, compress_quality: number, compress_max_width: number, compress_max_height: number, };
 
 /**
  * 设置审计日志实体
